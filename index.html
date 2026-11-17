@@ -3533,6 +3533,219 @@ const M61_STYLE=`
 `;
 {const s=document.createElement('style');s.textContent=M61_STYLE;document.head.appendChild(s)}
 
+
+
+/* === MILO v7: ONE persistent scene, ONE coordinate space, explicit drag/drop ===
+   Intro and play share exactly the same SVG objects. No re-randomization or reparenting.
+   Every pickable is in the dog's own layer, and its pointer coordinates are transformed
+   through that layer's screen CTM (so the layer's gentle movement doesn't detach items).
+*/
+const M7={last:null};
+const M7_LEAF_SPOTS=[
+ {x:300,y:480,name:'orecchio sinistro'},
+ {x:687,y:463,name:'orecchio destro'},
+ {x:476,y:259,name:'ciuffo della testa'},
+ {x:371,y:630,name:'spalla sinistra'},
+ {x:616,y:631,name:'spalla destra'},
+ {x:429,y:743,name:'petto'},
+ {x:788,y:732,name:'coda'},
+ {x:318,y:808,name:'zampa sinistra'}
+];
+const m7Ease=t=>t*t*(3-2*t);
+const m7Move=(g,x,y,rot,scale)=>g.setAttribute('transform',`translate(${x.toFixed(2)} ${y.toFixed(2)}) rotate(${rot.toFixed(2)}) scale(${scale.toFixed(3)})`);
+function m7LocalFromEvent(group,e){
+ const pt=document.createElementNS('http://www.w3.org/2000/svg','svg').createSVGPoint();
+ pt.x=e.clientX;pt.y=e.clientY;
+ const mat=group.getScreenCTM();
+ return mat?pt.matrixTransform(mat.inverse()):{x:0,y:0};
+}
+function m7ScenePointToLocal(svg,group,x,y){
+ const pt=svg.createSVGPoint();pt.x=x;pt.y=y;
+ const world=pt.matrixTransform(svg.getScreenCTM());
+ return world.matrixTransform(group.getScreenCTM().inverse());
+}
+function m7Animate(ui,ms,frame,finish){
+ const start=performance.now();
+ const tick=t=>{
+  if(!ui.w.isConnected)return;
+  const p=Math.min(1,(t-start)/ms);
+  frame(m7Ease(p),p);
+  if(p<1)requestAnimationFrame(tick); else finish?.();
+ };
+ requestAnimationFrame(tick);
+}
+function m7CircleButton(ui,x,y,icon,fn){
+ const g=mv4Node(ui.overlay,'g',{class:'mv4-item m7-button','role':'button','aria-label':icon==='arrow'?'Avanti':'Ricomincia',transform:`translate(${x} ${y})`});
+ if(icon==='arrow')g.innerHTML='<circle r="65" fill="#fff9df" stroke="#996b42" stroke-width="9"/><path d="M-35 -18H9V-42L53 0 9 42V18H-35Z" fill="#ffba5d" stroke="#965b3d" stroke-width="7" stroke-linejoin="round"/>';
+ else g.innerHTML='<circle r="48" fill="#fff9df" stroke="#996b42" stroke-width="8"/><path d="M29 -5A31 31 0 1 0 4 29" fill="none" stroke="#81aa80" stroke-width="10" stroke-linecap="round"/><path d="M-30 -28L-29 -5L-7 -16" fill="none" stroke="#81aa80" stroke-width="8" stroke-linejoin="round"/>';
+ g.innerHTML+='<circle r="69" fill="transparent"/>';
+ g.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();mv4Audio('step');fn()});
+ return g;
+}
+function m7Basket(ui){
+ const g=mv4Node(ui.overlay,'g',{'data-part':'basket','pointer-events':'none'});
+ // Back of the basket, foreground lip and dark visible opening.
+ g.innerHTML=`<path d="M742 799L958 799L926 926Q850 956 774 926Z" fill="#c78e61" stroke="#805237" stroke-width="9"/>
+ <path d="M772 835L942 835M780 873L934 873M803 811L814 929M856 814V942M907 813L896 928" stroke="#edc493" stroke-width="9" opacity=".8"/>
+ <ellipse cx="850" cy="795" rx="115" ry="38" fill="#e7b87f" stroke="#805237" stroke-width="9"/>
+ <ellipse cx="850" cy="797" rx="92" ry="23" fill="#70472e"/>`;
+ return g;
+}
+function m7RoundItems(){
+ const spots=m5Mix(M7_LEAF_SPOTS).slice(0,4);
+ const twigIndex=Math.floor(Math.random()*4);
+ const shapes=m5Mix([0,1,2,3]);
+ return spots.map((spot,i)=>({
+  id:i,spot,kind:i===twigIndex?'twig':'leaf',shape:i===twigIndex?4:shapes[i],
+  color:m5Choose(m5Color),rotation:m5Rand(-37,37),
+  x:spot.x,y:spot.y,collected:false,fallen:false
+ }));
+}
+function m7Begin(){
+ m5Init(); // Keep the rest of the grooming story compatible.
+ const ui=m5Scene('','','garden','leaves');
+ ui.head.style.display='none';
+ const round=m7RoundItems();
+ M7.last=round;
+ MV5.leaves=round;
+ const token=MV5.token;
+ const valid=()=>ui.w.isConnected && MV5.token===token;
+ const layer=mv4Node(ui.animal,'g',{'data-part':'m7-objects'});
+ m7Basket(ui);
+ const indicator=mv4Node(ui.overlay,'g',{'pointer-events':'none'});
+ const status={intro:0,playing:false,busy:false,collected:0};
+ const props=[];
+ function markers(){
+  indicator.innerHTML='';
+  round.forEach((o,i)=>{
+   const px=435+43*i;
+   mv4Node(indicator,'circle',{cx:px,cy:90,r:16,fill:o.collected?'#8db681':'#fff6df',stroke:'#81583c','stroke-width':4});
+   if(o.collected)mv4Node(indicator,'path',{d:`M${px-9} 90l7 7 13 -16`,fill:'none',stroke:'#fff','stroke-width':4,'stroke-linecap':'round'});
+  });
+ }
+ markers();
+ const basketGoal={x:850,y:798};
+ let nextButton=null;
+ function showFinal(){
+  if(!valid())return;
+  m5Burst(ui,515,180);
+  const sparkle=mv4Node(ui.overlay,'g',{'pointer-events':'none'});
+  sparkle.innerHTML='<path d="M0 -43L11 -12 43 0 11 12 0 43 -11 12 -43 0 -11 -12Z" fill="#ffd66e" stroke="#ad7e44" stroke-width="5"/>';
+  sparkle.setAttribute('transform','translate(505 188) scale(1.35)');
+  nextButton=m7CircleButton(ui,852,355,'arrow',()=>{
+   if(valid())m5Narrative('', 'garden',[{kind:'mud',sound:'step'},{kind:'mud',sound:'splash'},{kind:'mud',sound:'joy'}],m5Soap);
+  });
+ }
+ // Build every object only once. The three intro frames ONLY change visibility,
+ // never object coordinates, shapes or DOM parents.
+ round.forEach((o,i)=>{
+  const scale=o.kind==='twig'?1.62:1.62;
+  const g=mv4Node(layer,'g',{class:'mv4-item m7-object','data-kind':o.kind,'data-index':i,'aria-label':o.kind==='twig'?'Rametto da raccogliere':'Foglia da raccogliere'});
+  g.innerHTML=m5LeafTypes[o.shape](o.color)+'<circle r="50" fill="transparent" stroke="none"/>';
+  g.setAttribute('opacity','0');
+  let held=false,id=null,offsetX=0,offsetY=0,settling=false,finished=false;
+  let x=o.x,y=o.y,angle=o.rotation;
+  const set=(xx,yy,ang=angle,sz=scale)=>{x=xx;y=yy;angle=ang;m7Move(g,x,y,angle,sz)};
+  set(x,y,angle);
+  const freeze=v=>m6Freeze(ui,v);
+  function release(e){
+   if(!held)return;
+   held=false;id=null;
+   // Grab-and-drop is possible only during the actual minigame.
+   if(!valid())return;
+   const finger=mv4Coord(ui.svg,e);
+   // Target is a basket-shaped generous region; explicitly NO snap from far away.
+   const nearBasket = finger.x>=728 && finger.x<=975 && finger.y>=742 && finger.y<=929;
+   if(nearBasket){
+    settling=true;finished=true;g.style.pointerEvents='none';
+    const fromX=x,fromY=y,fromA=angle;
+    const dest=m7ScenePointToLocal(ui.svg,layer,basketGoal.x,basketGoal.y);
+    mv4Audio('leaves');
+    m7Animate(ui,480,(v)=>{
+      m7Move(g,fromX+(dest.x-fromX)*v,fromY+(dest.y-fromY)*v-24*Math.sin(Math.PI*v),fromA+95*v,scale*(1-.65*v));
+    },()=>{
+      if(!valid())return;
+      g.remove();o.collected=true;status.collected++;markers();
+      freeze(false);m5Burst(ui,basketGoal.x,basketGoal.y);
+      if(status.collected===round.length)showFinal();
+    });
+   }else{
+    // Miss: drop to a reachable spot on the floor, not under the basket.
+    settling=true;const sx=x,sy=y,sa=angle;
+    const floorX=Math.max(95,Math.min(670,x));
+    const floorY=878+(i%2)*28;
+    m7Animate(ui,340,(v)=>{
+      m7Move(g,sx+(floorX-sx)*v,sy+(floorY-sy)*v,sa+45*v,scale);
+    },()=>{
+      if(!valid())return;
+      set(floorX,floorY,sa+45);
+      o.fallen=true;settling=false;freeze(false);
+    });
+   }
+  }
+  g.addEventListener('pointerdown',e=>{
+   if(!status.playing||settling||finished)return;
+   e.stopPropagation();e.preventDefault();
+   held=true;id=e.pointerId;freeze(true);
+   const p=m7LocalFromEvent(layer,e);offsetX=x-p.x;offsetY=y-p.y;
+   // Keep the same parent throughout the complete lifecycle.
+   layer.appendChild(g);
+   try{g.setPointerCapture(id)}catch(_){}
+   g.classList.add('m7-held');
+  });
+  g.addEventListener('pointermove',e=>{
+   if(!held||e.pointerId!==id||!valid())return;
+   e.preventDefault();
+   const p=m7LocalFromEvent(layer,e);
+   set(Math.max(55,Math.min(952,p.x+offsetX)),Math.max(75,Math.min(950,p.y+offsetY)));
+  });
+  g.addEventListener('pointerup',e=>{
+   if(!held||e.pointerId!==id)return;
+   e.stopPropagation();e.preventDefault();g.classList.remove('m7-held');release(e);
+  });
+  g.addEventListener('pointercancel',e=>{
+   if(!held)return;
+   held=false;id=null;g.classList.remove('m7-held');freeze(false);
+  });
+  props.push(g);
+ });
+ // Intro is the SAME scene, not a recreated one. Big illustrated arrow advances.
+ let wind=null;
+ const arrow=m7CircleButton(ui,852,355,'arrow',advance);
+ function advance(){
+  if(!valid()||status.playing)return;
+  status.intro++;
+  if(status.intro===1){
+    // Wind swirls; the actual four pickables are still in their final coordinates.
+    wind=mv4Node(ui.effects,'g',{'pointer-events':'none'});
+    wind.innerHTML='<path d="M155 315Q245 250 300 303M730 290Q815 265 870 320M95 410Q140 385 190 405" stroke="#b8c88c" stroke-width="14" fill="none" stroke-linecap="round" stroke-dasharray="10 20"/>';
+    wind.animate([{opacity:0},{opacity:1},{opacity:.6}],{duration:800,fill:'forwards'});
+    mv4Audio('step');
+  }else if(status.intro===2){
+    if(wind){wind.remove();wind=null;}
+    props.forEach((g,i)=>g.animate([{opacity:0},{opacity:1}],{duration:450}));
+    props.forEach(g=>g.setAttribute('opacity','1'));
+    mv4Audio('leaves');
+  }else{
+    status.playing=true;
+    arrow.remove();
+    m5Burst(ui,817,170);
+  }
+ }
+ // Reset is always possible, no text and no hidden controls.
+ m7CircleButton(ui,122,886,'reset',()=>showMiloIntro());
+}
+function showMiloIntro(){m7Begin()}
+function m5Leaves(){m7Begin()}
+const M7_STYLE=`
+.m7-object{touch-action:none;cursor:grab;filter:drop-shadow(0 5px 3px #6a482755)}
+.m7-object.m7-held{cursor:grabbing;filter:drop-shadow(0 11px 9px #6a482799)}
+.m7-button{cursor:pointer;touch-action:manipulation}
+.m7-button[aria-label="Avanti"]{animation:m7-hint 1.5s ease-in-out infinite;transform-origin:831px 882px;filter:drop-shadow(0 0 13px #fbc567)}
+@keyframes m7-hint{0%,100%{opacity:1}50%{opacity:.74}}
+`;
+{const style=document.createElement('style');style.textContent=M7_STYLE;document.head.appendChild(style)}
+
 showHome();
 document.addEventListener('gesturestart',e=>e.preventDefault());
 </script><script>
