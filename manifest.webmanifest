@@ -1,0 +1,26 @@
+{
+  "id": "./",
+  "name": "Il mondo di Ginny",
+  "short_name": "Ginny",
+  "description": "Giochi illustrati per bambini: cucina, animali, giardino e casa.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffe9c7",
+  "theme_color": "#ffe9c7",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
