@@ -3183,11 +3183,11 @@ const m5ToolSvg={
  brush:`<path d="M-57 -32Q-61 -44 -39 -47H49Q67 -42 61 -19V20Q58 36 39 35H-45Q-63 33 -57 14Z" fill="#d49c6d" stroke="#98603d" stroke-width="7"/><path d="M-36 34V80M-14 34V84M9 34V84M31 34V80" stroke="#8f6750" stroke-width="8" stroke-linecap="round"/><path d="M-36 -22H40" stroke="#efc8a0" stroke-width="7"/>`
 };
 const m5LeafTypes=[
- (c)=>`<path d="M0 -41Q40 -25 34 11Q24 38 0 42Q-32 18 -28 -13Q-21 -34 0 -41Z" fill="${c}" stroke="#7e653f" stroke-width="5"/><path d="M0 30V-30M0 4L23 -10M0 10L-17 -12" stroke="#ffe4a3" stroke-width="4" fill="none"/>`,
- (c)=>`<path d="M0 -43L13 -19 31 -24 22 -3 40 12 18 18 15 36 0 28 -15 36 -18 18 -39 12 -21 -4 -30 -24 -11 -19Z" fill="${c}" stroke="#886443" stroke-width="5" stroke-linejoin="round"/><path d="M0 28V-30M0 7L-22 -2M0 7L20 -5" stroke="#f8dc9e" stroke-width="4" fill="none"/>`,
- (c)=>`<path d="M-39 -9Q-33 -39 10 -34Q42 -21 30 14Q4 39 -33 15Z" fill="${c}" stroke="#876a3f" stroke-width="5"/><path d="M-29 15Q0 8 23 -21M-5 6L-13 -17M6 -4L25 7" stroke="#ffebad" stroke-width="4" fill="none"/>`,
- (c)=>`<path d="M-34 12Q-13 -19 9 -43Q35 -17 30 15Q14 40 -18 32Z" fill="${c}" stroke="#765c3e" stroke-width="5"/><path d="M-13 28Q3 5 13 -29" fill="none" stroke="#fff1b4" stroke-width="4"/>`,
- ()=>`<path d="M-37 -11Q-17 -12 -4 -2L20 15Q32 16 40 10" fill="none" stroke="#976442" stroke-width="12" stroke-linecap="round"/><path d="M-18 -6L-25 -25M10 9L20 -9" fill="none" stroke="#976442" stroke-width="7" stroke-linecap="round"/>`
+ (c)=>`<path d="M0 -41Q40 -25 34 11Q24 38 0 42Q-32 18 -28 -13Q-21 -34 0 -41Z" fill="${c}" stroke="#594332" stroke-width="5"/><path d="M0 30V-30M0 4L23 -10M0 10L-17 -12" stroke="#ffe4a3" stroke-width="4" fill="none"/>`,
+ (c)=>`<path d="M0 -43L13 -19 31 -24 22 -3 40 12 18 18 15 36 0 28 -15 36 -18 18 -39 12 -21 -4 -30 -24 -11 -19Z" fill="${c}" stroke="#594332" stroke-width="5" stroke-linejoin="round"/><path d="M0 28V-30M0 7L-22 -2M0 7L20 -5" stroke="#f8dc9e" stroke-width="4" fill="none"/>`,
+ (c)=>`<path d="M-39 -9Q-33 -39 10 -34Q42 -21 30 14Q4 39 -33 15Z" fill="${c}" stroke="#594332" stroke-width="5"/><path d="M-29 15Q0 8 23 -21M-5 6L-13 -17M6 -4L25 7" stroke="#ffebad" stroke-width="4" fill="none"/>`,
+ (c)=>`<path d="M-34 12Q-13 -19 9 -43Q35 -17 30 15Q14 40 -18 32Z" fill="${c}" stroke="#594332" stroke-width="5"/><path d="M-13 28Q3 5 13 -29" fill="none" stroke="#fff1b4" stroke-width="4"/>`,
+ ()=>`<path d="M-37 -11Q-17 -12 -4 -2L20 15Q32 16 40 10" fill="none" stroke="#594332" stroke-width="12" stroke-linecap="round"/><path d="M-18 -6L-25 -25M10 9L20 -9" fill="none" stroke="#594332" stroke-width="7" stroke-linecap="round"/>`
 ];
 const m5Color=['#a6bf62','#d8a447','#de805c','#91b67c','#e1ca62','#c97455'];
 const m5Burst=(ui,x,y)=>{const g=mv4Node(ui.effects,'g');for(let i=0;i<5;i++){const a=i*Math.PI*2/5;const n=mv4Node(g,'path',{d:'M0 -12L4 -4 12 0 4 4 0 12 -4 4 -12 0 -4 -4Z',fill:i%2?'#ffdb77':'#fff9d9',transform:`translate(${x+24*Math.cos(a)} ${y+24*Math.sin(a)}) scale(.55)`,class:'mv4-float'});n.style.animationDelay=(i*65)+'ms'}setTimeout(()=>g.remove(),950);mv4Audio('joy')};
@@ -3278,6 +3278,120 @@ const M5CSS=`
 @keyframes m5-cheer{to{transform:rotate(2deg) translateY(-14px)}}
 `;
 {const n=document.createElement('style');n.textContent=M5CSS;document.head.appendChild(n)}
+
+
+/* MILO v6: object-centric interactions, SVG-only coordinates, illustrated visual arrows. */
+const M6={anim:null};
+const m6Freeze=(ui,freeze)=>{if(ui.animal)ui.animal.classList.toggle('busy',freeze)};
+function m6NextArrow(ui,fn){
+  const btn=mv4Node(ui.overlay,'g',{class:'mv4-item m6-next',role:'button','aria-label':'Avanti',transform:'translate(818 880)'},`<circle r="76" fill="#fff8e2" stroke="#a76534" stroke-width="10"/><path d="M-39 -21H15V-46L63 0 15 46V21H-39Z" fill="#ffae4f" stroke="#91532f" stroke-width="7" stroke-linejoin="round"/><circle cx="-33" cy="-37" r="6" fill="#fff" opacity=".9"/>`);
+  btn.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();mv4Audio('step');fn()});
+  return btn;
+}
+function m5Narrative(title,kind,sequence,next){
+  const ui=m5Scene('', '',kind,'story');
+  const head=ui.head;head.style.display='none';
+  let frame=0,closed=false;const decor=mv4Node(ui.overlay,'g',{'pointer-events':'none'});
+  function paint(){
+    if(!ui.w.isConnected||closed)return;
+    const f=sequence[frame];decor.innerHTML='';
+    if(f.kind==='leaves'){
+      for(let j=0;j<5;j++)mv4Node(decor,'g',{transform:`translate(${200+j*148} ${220+(j%3)*85}) rotate(${j*43}) scale(${1.5+(j%2)*.25})`},m5LeafTypes[j%4](m5Color[j]));
+    }else if(f.kind==='mud'){
+      mv4Node(decor,'path',{d:'M120 854Q220 806 340 832Q468 794 580 829Q730 799 884 841L893 914Q501 964 126 910Z',fill:'#aa7047',stroke:'#805031','stroke-width':9});
+      for(let j=0;j<7;j++)mv4Node(decor,'path',{d:`M${210+j*89} ${783+j%3*17}q-18 -40 -28 -2q8 21 28 2`,fill:'#996442'});
+    }else if(f.kind==='towel'){
+      for(let j=0;j<6;j++)mv4Node(decor,'g',{transform:`translate(${260+j*110} ${268+(j%2)*65})`},m5DropShape(j%2===0));
+    }else if(f.kind==='fluff'){
+      for(let j=0;j<4;j++)mv4Node(decor,'path',{d:`M${340+j*100} 240q-28 -57 0 -78q-6 51 29 49`,fill:'none',stroke:'#db9952','stroke-width':13,'stroke-linecap':'round'});
+    }else if(f.kind==='ready'){
+      mv4Node(decor,'path',{d:'M441 166L478 201 556 125',fill:'none',stroke:'#76b986','stroke-width':23,'stroke-linecap':'round','stroke-linejoin':'round'});
+    }
+    mv4Audio(f.sound||'step');
+    ui.animal.animate([{opacity:.8,transform:'translateY(7px)'},{opacity:1,transform:'translateY(-7px)'},{opacity:1,transform:'translateY(0)'}],{duration:950});
+  }
+  const advance=()=>{if(closed||!ui.w.isConnected)return;if(frame<sequence.length-1){frame++;paint()}else{closed=true;next()}};
+  paint();m6NextArrow(ui,advance);
+  // Slides progress automatically at a gentle pace; arrow always allows immediate advance.
+  const epoch=EP;const tid=setInterval(()=>{if(!ui.w.isConnected||closed||epoch!==EP){clearInterval(tid);return}advance()},2650);
+}
+function showMiloIntro(){
+  m5Init();const ui=m5Scene('', '', 'room','intro');ui.head.style.display='none';
+  const paw=mv4Node(ui.overlay,'g',{transform:'translate(840 180)','pointer-events':'none'},'<path d="M-25 7q0 -25 23 -25q22 0 24 24q15 25 -6 31q-16 2 -23 -9q-15 13 -28 -1q-10 -13 10 -20Z" fill="#e9ba81" stroke="#a26b48" stroke-width="6"/><circle cx="-33" cy="-33" r="12" fill="#e9ba81"/><circle cx="1" cy="-49" r="12" fill="#e9ba81"/><circle cx="30" cy="-31" r="12" fill="#e9ba81"/>');
+  m6NextArrow(ui,()=>m5Narrative('', 'garden',[{sound:'step'},{kind:'leaves',sound:'leaves'},{kind:'leaves',sound:'joy'}],m5Leaves));
+}
+function m6MoveLeaf(g,x,y,deg,scale=1.5){g.setAttribute('transform',`translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${deg.toFixed(1)}) scale(${scale})`)}
+function m6Tween(ui,seconds,step,done){const start=performance.now();function tick(now){if(!ui.w.isConnected)return;const t=Math.min(1,(now-start)/(seconds*1000));step(t);if(t<1)requestAnimationFrame(tick);else done?.()}requestAnimationFrame(tick)}
+function m5Leaves(){
+  const ui=m5Scene('','','garden','leaves');ui.head.style.display='none';
+  const basket=mv4Node(ui.overlay,'g',{'pointer-events':'none'});
+  basket.innerHTML=`<path d="M740 805H955L922 925Q847 955 774 925Z" fill="#c88c59" stroke="#8c5638" stroke-width="10"/><path d="M760 842L936 842M767 885H930M806 814L812 932M868 815L871 936M917 812L905 930" fill="none" stroke="#eab883" stroke-width="12"/><ellipse cx="850" cy="802" rx="113" ry="33" fill="#edbc7e" stroke="#8c5638" stroke-width="10"/><ellipse cx="850" cy="797" rx="83" ry="16" fill="#865231"/>`;
+  let collected=0,lock=false;
+  const xBin=850,yBin=791;
+  // Placed inside the character so the leaves move with the dog's idle breathing.
+  MV5.leaves.forEach((q,i)=>{
+    const xStart=q.x,yStart=q.y;
+    let x=xStart,y=yStart,angle=q.angle,held=false,fallen=false,done=false,offsetX=0,offsetY=0,lastX=x,lastY=y;
+    const scale=q.shape===4?1.8:1.7;
+    const g=mv4Node(ui.coat,'g',{class:'m6-pickable','pointer-events':'all'},`<g>${m5LeafTypes[q.shape](q.color)}</g><circle r="57" fill="transparent"/>`);
+    m6MoveLeaf(g,x,y,angle,scale);
+    const release=(e,cancel=false)=>{
+      if(!held||done)return;held=false;m6Freeze(ui,false);
+      const p=mv4Coord(ui.svg,e);
+      if(cancel){m6Tween(ui,.22,t=>m6MoveLeaf(g,x,y,angle),()=>{});return}
+      const near=Math.hypot(x-xBin,y-yBin)<151;
+      if(near){
+        done=true;g.style.pointerEvents='none';const sx=x,sy=y,sa=angle;
+        m6Tween(ui,.48,t=>{const ease=t*t*(3-2*t);m6MoveLeaf(g,sx+(xBin-sx)*ease,sy+(yBin-sy)*ease-53*Math.sin(Math.PI*t),sa+t*170,scale*(1-.66*ease))},()=>{
+          g.remove();q.done=true;collected++;m5Burst(ui,xBin,766);mv4Audio('leaves');
+          if(collected===MV5.leaves.length&&!lock){lock=true;m5Complete(ui,()=>m5Narrative('', 'garden',[{kind:'mud',sound:'step'},{kind:'mud',sound:'splash'},{kind:'mud',sound:'joy'}],m5Soap))}
+        });return;
+      }
+      // Real fall: remains on the ground, can be picked up again.
+      const sx=x,sy=y,sa=angle,groundY=875+m5Rand(-14,28),groundX=Math.max(75,Math.min(900,x+m5Rand(-24,24)));
+      fallen=true;mv4Audio('leaves');
+      m6Tween(ui,.42,t=>{const ease=1-Math.pow(1-t,2);x=sx+(groundX-sx)*ease;y=sy+(groundY-sy)*ease;angle=sa+83*ease;m6MoveLeaf(g,x,y,angle,scale)},()=>m6MoveLeaf(g,x,y,angle,scale));
+    };
+    g.addEventListener('pointerdown',e=>{
+      if(done)return;e.stopPropagation();e.preventDefault();held=true;
+      // Move into same absolute-scene coordinate system while being dragged.
+      if(g.parentNode!==ui.overlay){const rect=g.getBoundingClientRect();const pt=ui.svg.createSVGPoint();pt.x=rect.left+rect.width/2;pt.y=rect.top+rect.height/2;const world=pt.matrixTransform(ui.svg.getScreenCTM().inverse());x=world.x;y=world.y;ui.overlay.appendChild(g);m6MoveLeaf(g,x,y,angle,scale)}
+      ui.svg.setPointerCapture(e.pointerId);m6Freeze(ui,true);
+      const p=mv4Coord(ui.svg,e);offsetX=x-p.x;offsetY=y-p.y;
+    });
+    ui.svg.addEventListener('pointermove',e=>{if(!held)return;const p=mv4Coord(ui.svg,e);lastX=x;lastY=y;x=Math.max(32,Math.min(970,p.x+offsetX));y=Math.max(40,Math.min(940,p.y+offsetY));m6MoveLeaf(g,x,y,angle,scale)});
+    ui.svg.addEventListener('pointerup',e=>{if(held){e.stopPropagation();release(e)}});
+    ui.svg.addEventListener('pointercancel',e=>{if(held){e.stopPropagation();release(e,true)}});
+  });
+  // An illustrated tiny retry symbol, no reading required.
+  const retry=mv4Node(ui.overlay,'g',{class:'mv4-item m6-retry',transform:'translate(125 881)',role:'button','aria-label':'Ricomincia'},'<circle r="50" fill="#fff8e7" stroke="#aa784e" stroke-width="8"/><path d="M29 -9Q16 -34 -12 -21Q-35 -7 -24 23Q-3 40 24 18" fill="none" stroke="#83a980" stroke-width="11" stroke-linecap="round"/><path d="M-11 -36L-27 -18L-3 -10" fill="none" stroke="#83a980" stroke-width="9" stroke-linejoin="round"/>');
+  retry.addEventListener('pointerdown',e=>{e.stopPropagation();showMiloIntro()});
+}
+function m5ToolDrag(ui,tool,opts={}){
+  let active=false, x=opts.x??105,y=opts.y??837,dx=0,dy=0;
+  const pos=(xx,yy)=>tool.setAttribute('transform',`translate(${xx} ${yy})`);
+  tool.style.pointerEvents='all';
+  tool.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();if(opts.canGrab&&!opts.canGrab()){mv4Audio('brush');return}active=true;tool.setPointerCapture(e.pointerId);m6Freeze(ui,true);const p=mv4Coord(ui.svg,e);dx=x-p.x;dy=y-p.y;opts.grab?.(p);tool.parentNode.appendChild(tool)});
+  tool.addEventListener('pointermove',e=>{if(!active)return;const p=mv4Coord(ui.svg,e);x=Math.max(25,Math.min(975,p.x+dx));y=Math.max(50,Math.min(940,p.y+dy));pos(x,y);opts.move?.({x,y,p})});
+  function end(e){if(!active)return;active=false;m6Freeze(ui,false);opts.drop?.({x,y});
+    if(opts.floor&&y<730){const sx=x,sy=y,ex=Math.max(100,Math.min(890,x)),ey=opts.floorY||896;m6Tween(ui,.32,t=>{const ease=t*t*(3-2*t);pos(sx+(ex-sx)*ease,sy+(ey-sy)*ease)},()=>{x=ex;y=ey;pos(x,y)})}
+    else if(opts.reset!==false){const sx=x,sy=y,ex=opts.x??105,ey=opts.y??837;m6Tween(ui,.25,t=>{const ease=t*t*(3-2*t);pos(sx+(ex-sx)*ease,sy+(ey-sy)*ease)},()=>{x=ex;y=ey;pos(x,y)})}
+  }
+  tool.addEventListener('pointerup',end);tool.addEventListener('pointercancel',end);
+  return {returnPos:()=>{x=opts.x??105;y=opts.y??837;pos(x,y)}};
+}
+const M6STYLE=`
+.m6-pickable{cursor:grab;touch-action:none;filter:drop-shadow(0 5px 3px #583a2960)}
+.m6-pickable:active{cursor:grabbing}
+.m6-next{cursor:pointer;transform-origin:center;animation:m6-bob 1.35s ease-in-out infinite;filter:drop-shadow(0 0 11px #ffda70)}
+@keyframes m6-bob{0%,100%{opacity:1}50%{opacity:.78}}
+.m6-retry{cursor:pointer}
+.m5-ui .mv4-character{animation:m6-alive 4.8s ease-in-out infinite!important;transform-origin:500px 740px}
+.m5-ui .mv4-character.busy{animation-play-state:paused!important}
+@keyframes m6-alive{0%,100%{transform:translateY(0) rotate(0)}20%{transform:translateY(-4px) rotate(-.35deg)}50%{transform:translateY(-8px) rotate(.5deg)}75%{transform:translateY(-4px) rotate(-.3deg)}}
+.m5-ui .mv4-top{pointer-events:none}
+`;
+{let style=document.createElement('style');style.textContent=M6STYLE;document.head.appendChild(style)}
 
 showHome();
 document.addEventListener('gesturestart',e=>e.preventDefault());
