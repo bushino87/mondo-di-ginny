@@ -3393,6 +3393,146 @@ const M6STYLE=`
 `;
 {let style=document.createElement('style');style.textContent=M6STYLE;document.head.appendChild(style)}
 
+
+/* Milo v6.1 - leaf collection hotfix: anchored artwork, stable drag coordinates,
+   real basket target and no accidental object respawn during the same round. */
+function m5Leaves(){
+  const ui=m5Scene('', '', 'garden','leaves');
+  ui.head.style.display='none';
+  // Make the dog's stage slightly taller on all screen sizes, without changing touch coordinates.
+  const basket=mv4Node(ui.overlay,'g',{'pointer-events':'none','data-milo-basket':'1'});
+  basket.innerHTML=`<path d="M740 805H955L922 925Q847 955 774 925Z" fill="#c88c59" stroke="#8c5638" stroke-width="10"/><path d="M760 842L936 842M767 885H930M806 814L812 932M868 815L871 936M917 812L905 930" fill="none" stroke="#eab883" stroke-width="12"/><ellipse cx="850" cy="802" rx="113" ry="33" fill="#edbc7e" stroke="#8c5638" stroke-width="10"/><ellipse cx="850" cy="797" rx="83" ry="16" fill="#865231"/>`;
+  // Coordinates picked from the silhouette of the actual Milo image, NOT the old vector dog.
+  // Keep interactive objects mostly on ears, top fur, shoulder, chest and tail, avoiding eyes.
+  const anchoredSpots=[
+    {x:320,y:440,name:'left-ear'}, {x:690,y:450,name:'right-ear'},
+    {x:475,y:254,name:'forehead-tuft'}, {x:380,y:626,name:'left-shoulder'},
+    {x:617,y:654,name:'right-shoulder'}, {x:459,y:710,name:'chest'},
+    {x:755,y:752,name:'tail-tip'}, {x:346,y:787,name:'left-leg'}
+  ];
+  const shuffled=m5Mix(anchoredSpots);
+  const count=3+Math.floor(Math.random()*3);
+  const types=m5Mix([0,1,2,3,4,1,2,0]);
+  const palette=m5Mix(m5Color);
+  MV5.leaves=shuffled.slice(0,count).map((spot,i)=>({
+    ...spot,id:i,shape:types[i],color:palette[i%palette.length],
+    angle:m5Rand(-35,35),done:false,fallen:false
+  }));
+  let collected=0,transitioning=false;
+  const currentRound=MV5.token;
+  const indicator=mv4Node(ui.overlay,'g',{'pointer-events':'none'});
+  function updateIndicator(){
+    indicator.innerHTML='';
+    for(let i=0;i<MV5.leaves.length;i++){
+      const x=410+i*43;
+      mv4Node(indicator,'circle',{cx:x,cy:91,r:16,fill:i<collected?'#91b978':'#fff8e6',stroke:'#946b4a','stroke-width':4});
+      if(i<collected) mv4Node(indicator,'path',{d:`M${x-8} 91l6 6 12 -15`,fill:'none',stroke:'#fff','stroke-width':4,'stroke-linecap':'round'});
+    }
+  }
+  updateIndicator();
+  // This group stays a CHILD of the dog throughout all phases of an item.
+  // No reparenting: no screen-to-SVG origin jumps and the items inherit idle motion.
+  const itemLayer=mv4Node(ui.animal,'g',{'data-part':'anchored-leaves'});
+  const floorLayer=mv4Node(ui.animal,'g',{'data-part':'floor-leaves'});
+  function pointInDogCoords(e){
+    const p=ui.svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;
+    const m=ui.animal.getScreenCTM();
+    return m?p.matrixTransform(m.inverse()):mv4Coord(ui.svg,e);
+  }
+  function setPos(g,x,y,angle,scale){
+    g.setAttribute('transform',`translate(${x.toFixed(2)} ${y.toFixed(2)}) rotate(${angle.toFixed(2)}) scale(${scale})`);
+  }
+  MV5.leaves.forEach((q,i)=>{
+    let x=q.x,y=q.y,angle=q.angle,held=false,settling=false,done=false;
+    let heldId=null,offX=0,offY=0,startingX=x,startingY=y,moved=false;
+    const scale=q.shape===4?2.0:1.85;
+    const g=mv4Node(itemLayer,'g',{class:'mv4-item m6-pickable m61-leaf','data-index':i,'data-spot':q.name,'pointer-events':'all'},
+       m5LeafTypes[q.shape](q.color)+'<circle r="46" fill="transparent" stroke="none"/>');
+    setPos(g,x,y,angle,scale);
+    const valid=()=>ui.w.isConnected && MV5.token===currentRound;
+    const positionTo=(xx,yy,aa=angle)=>{x=xx;y=yy;angle=aa;setPos(g,x,y,angle,scale)};
+    const drop=(e,cancelled=false)=>{
+      if(!held||done)return;
+      held=false;heldId=null;m6Freeze(ui,false);
+      g.classList.remove('m61-held');
+      if(cancelled){positionTo(startingX,startingY);return;}
+      // Basket is a generous yet LOCAL target: object must actually reach the basket area.
+      const p=mv4Coord(ui.svg,e);
+      const inBasket=p.x>710 && p.x<985 && p.y>715 && p.y<945;
+      if(inBasket){
+        done=true;settling=true;g.style.pointerEvents='none';
+        const sx=x,sy=y,sa=angle,tx=845+m5Rand(-26,26),ty=800;
+        mv4Audio('leaves');
+        m6Tween(ui,.56,t=>{
+          const ee=t*t*(3-2*t);
+          setPos(g,sx+(tx-sx)*ee,sy+(ty-sy)*ee-38*Math.sin(Math.PI*t),sa+200*ee,scale*(1-.67*ee));
+        },()=>{
+          if(!valid())return;
+          g.remove();q.done=true;collected++;
+          updateIndicator();m5Burst(ui,845,790);mv4Audio('leaves');
+          if(collected===MV5.leaves.length&&!transitioning){
+            transitioning=true;
+            m5Complete(ui,()=>{
+              if(valid())m5Narrative('', 'garden',[
+                {kind:'mud',sound:'step'},{kind:'mud',sound:'splash'},{kind:'mud',sound:'joy'}
+              ],m5Soap);
+            });
+          }
+        });
+        return;
+      }
+      // Dropped outside basket: the object stays visible on the floor and can be picked up.
+      const sx=x,sy=y,sa=angle;
+      const fx=Math.max(75,Math.min(690,x)); // keep it away from basket, still reachable
+      const fy=880+m5Rand(-12,18);
+      const rot=sa+m5Rand(-65,65);
+      settling=true;
+      mv4Audio('leaves');
+      m6Tween(ui,.38,t=>{
+        const ee=1-Math.pow(1-t,2);
+        positionTo(sx+(fx-sx)*ee,sy+(fy-sy)*ee,sa+(rot-sa)*ee);
+      },()=>{
+        if(!valid())return;
+        settling=false;q.fallen=true;
+        // Still within the dog's coordinate space, but displayed above the floor.
+        floorLayer.appendChild(g);
+      });
+    };
+    g.addEventListener('pointerdown',e=>{
+      if(done||settling||transitioning)return;
+      e.stopPropagation();e.preventDefault();
+      held=true;heldId=e.pointerId;
+      startingX=x;startingY=y;moved=false;
+      const p=pointInDogCoords(e);offX=x-p.x;offY=y-p.y;
+      m6Freeze(ui,true);g.classList.add('m61-held');
+      g.setPointerCapture(e.pointerId);
+      if(g.parentNode===itemLayer)itemLayer.appendChild(g);
+      else floorLayer.appendChild(g);
+    });
+    g.addEventListener('pointermove',e=>{
+      if(!held||e.pointerId!==heldId)return;
+      const p=pointInDogCoords(e);
+      const nx=Math.max(45,Math.min(950,p.x+offX));
+      const ny=Math.max(70,Math.min(940,p.y+offY));
+      moved=moved||Math.hypot(nx-startingX,ny-startingY)>9;
+      positionTo(nx,ny);
+    });
+    g.addEventListener('pointerup',e=>{e.stopPropagation();drop(e)});
+    g.addEventListener('pointercancel',e=>{e.stopPropagation();drop(e,true)});
+    g.addEventListener('lostpointercapture',()=>{
+      if(held){held=false;heldId=null;m6Freeze(ui,false);g.classList.remove('m61-held');}
+    });
+  });
+  const retry=mv4Node(ui.overlay,'g',{class:'mv4-item m6-retry',transform:'translate(125 881)',role:'button','aria-label':'Ricomincia'},
+    '<circle r="50" fill="#fff8e7" stroke="#aa784e" stroke-width="8"/><path d="M29 -9Q16 -34 -12 -21Q-35 -7 -24 23Q-3 40 24 18" fill="none" stroke="#83a980" stroke-width="11" stroke-linecap="round"/><path d="M-11 -36L-27 -18L-3 -10" fill="none" stroke="#83a980" stroke-width="9" stroke-linejoin="round"/>');
+  retry.addEventListener('pointerdown',e=>{e.stopPropagation();showMiloIntro()});
+}
+const M61_STYLE=`
+.m61-leaf{touch-action:none;cursor:grab;filter:drop-shadow(0 3px 2px #5e442e55)}
+.m61-leaf.m61-held{cursor:grabbing;filter:drop-shadow(0 9px 7px #5e442e88)}
+`;
+{const s=document.createElement('style');s.textContent=M61_STYLE;document.head.appendChild(s)}
+
 showHome();
 document.addEventListener('gesturestart',e=>e.preventDefault());
 </script><script>
