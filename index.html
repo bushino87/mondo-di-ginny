@@ -2767,7 +2767,7 @@ function showMenu(kind){
 }
 
 /* ===========================================================
-   MONDO DI GINNY · MILO · PROTOTIPO TOELETTATURA v0.2
+   MONDO DI GINNY · MILO · PROTOTIPO TOELETTATURA v0.3
    Scena e personaggio SVG originali: nessuna dipendenza remota.
    Le altre sezioni del gioco restano invariate.
    =========================================================== */
@@ -2782,7 +2782,7 @@ const MILO_STYLE = `
  .milo-button{font:700 clamp(17px,3vw,24px) 'Fredoka',system-ui,sans-serif;min-height:55px;min-width:136px;padding:10px 22px;background:#ee946c;color:white;border:3px solid #fff6e7;border-radius:22px;box-shadow:0 5px 0 #bb6a49;touch-action:manipulation;cursor:pointer}
  .milo-button:active{transform:translateY(3px);box-shadow:0 2px 0 #bb6a49}
  .milo-button.secondary{color:#805c43;background:#fffbf4;box-shadow:0 5px 0 #d5b796;border-color:#f5dcc0}
- .milo-leaf{cursor:grab;touch-action:none;outline:none}
+ .milo-leaf{cursor:grab;touch-action:none;outline:none;will-change:opacity}
  .milo-leaf:focus-visible{outline:4px solid #3368ae}
  .milo-tail{transform-origin:307px 323px;animation:milo-wag 1s ease-in-out infinite alternate}
  .milo-tail.happy{animation-duration:.23s}
@@ -2808,51 +2808,75 @@ const MILO={phase:'intro',leaves:[],cheer:false};
 function miloSvg(){
  return `<svg class="milo-art" viewBox="0 0 440 485" role="img" aria-label="Milo, un cagnolino illustrato da aiutare" xmlns="http://www.w3.org/2000/svg">
  <defs>
-  <linearGradient id="miloWall" x2="0" y2="1"><stop stop-color="#fff9e9"/><stop offset="1" stop-color="#f6ddb8"/></linearGradient>
-  <linearGradient id="miloFur" x2="0.8" y2="1"><stop stop-color="#efbe85"/><stop offset="1" stop-color="#d99b62"/></linearGradient>
+  <linearGradient id="miloWall" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#fffaf0"/><stop offset="1" stop-color="#f9e5c6"/></linearGradient>
+  <linearGradient id="miloFur" x1="0" x2=".75" y1="0" y2="1"><stop stop-color="#f8cf95"/><stop offset=".62" stop-color="#eeb47c"/><stop offset="1" stop-color="#d88f55"/></linearGradient>
+  <linearGradient id="miloEars" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#b7754a"/><stop offset="1" stop-color="#885133"/></linearGradient>
+  <linearGradient id="miloBasket" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#ecb877"/><stop offset="1" stop-color="#bf8050"/></linearGradient>
  </defs>
- <!-- ambiente illustrato: pavimento, mensola, finestra e tappeto -->
- <rect x="5" y="6" width="430" height="468" rx="32" fill="url(#miloWall)" stroke="#d9b693" stroke-width="4"/>
- <path d="M9 346 H431 V442 Q431 471 398 471 H41 Q9 471 9 437Z" fill="#e9cba3"/>
- <path d="M11 348 H429" stroke="#d2ae85" stroke-width="6"/>
- <rect x="28" y="32" width="108" height="117" rx="13" fill="#fffdf2" stroke="#deb892" stroke-width="7"/>
- <rect x="39" y="42" width="86" height="93" rx="8" fill="#bce7e8"/>
- <circle cx="107" cy="65" r="15" fill="#ffe99c"/>
- <path d="M39 124 Q66 82 93 113 Q107 95 125 115 V136 H39Z" fill="#9ccaa4"/>
- <path d="M82 43 V136 M40 86 H125" stroke="#fff6e6" stroke-width="6"/>
- <path d="M316 107 H411" stroke="#bd916d" stroke-width="10" stroke-linecap="round"/>
- <rect x="328" y="54" width="34" height="53" rx="8" fill="#bbd8bb" stroke="#749d81" stroke-width="3"/>
- <rect x="375" y="66" width="25" height="41" rx="6" fill="#e6b6a0" stroke="#bc8675" stroke-width="3"/>
- <path d="M332 63 Q346 51 358 63" stroke="#fff8e9" stroke-width="5" fill="none"/>
- <ellipse cx="220" cy="417" rx="155" ry="37" fill="#fff7e9" stroke="#ddbb99" stroke-width="5"/>
+ <rect x="5" y="6" width="430" height="468" rx="31" fill="url(#miloWall)" stroke="#d9b693" stroke-width="4"/>
+ <path d="M8 346 H432 V443 Q432 471 401 471 H39 Q8 471 8 438Z" fill="#ecd2af"/>
+ <path d="M11 347 H429" stroke="#d5b18c" stroke-width="6"/>
+ <rect x="30" y="35" width="105" height="120" rx="17" fill="#fffdf5" stroke="#dfc09e" stroke-width="7"/>
+ <rect x="42" y="47" width="81" height="95" rx="8" fill="#bce5e9"/>
+ <circle cx="103" cy="69" r="17" fill="#ffebaa"/>
+ <path d="M42 125 Q69 79 97 111 Q110 93 123 106 V142 H42Z" fill="#9ccba7"/>
+ <path d="M82 48 V142 M43 91 H123" stroke="#fff8e7" stroke-width="6"/>
+ <path d="M316 110 H410" stroke="#bc926e" stroke-width="9" stroke-linecap="round"/>
+ <rect x="330" y="60" width="32" height="49" rx="7" fill="#b9d9c2" stroke="#8eac98" stroke-width="3"/>
+ <rect x="374" y="70" width="26" height="39" rx="7" fill="#f2c8b4" stroke="#c49380" stroke-width="3"/>
+ <ellipse cx="216" cy="418" rx="152" ry="35" fill="#fffaf1" stroke="#e0c3a2" stroke-width="4"/>
+ <ellipse cx="218" cy="409" rx="112" ry="18" fill="#aa7d50" opacity=".15"/>
+ <!-- Milo: silhouette canina, petto, zampe, orecchie morbide e muso sporgente -->
  <g class="milo-bob" id="milo-character">
-  <g class="milo-tail"><path d="M303 329 Q369 304 342 253" fill="none" stroke="#b47a48" stroke-width="31" stroke-linecap="round"/><path d="M303 329 Q369 304 342 253" fill="none" stroke="#e4ae71" stroke-width="22" stroke-linecap="round"/></g>
-  <ellipse cx="219" cy="329" rx="105" ry="88" fill="url(#miloFur)" stroke="#9c6645" stroke-width="5"/>
-  <ellipse cx="218" cy="334" rx="65" ry="57" fill="#f9dfb5" opacity=".93"/>
-  <ellipse cx="151" cy="398" rx="33" ry="26" fill="#e7ad73" stroke="#9c6645" stroke-width="4"/>
-  <ellipse cx="284" cy="398" rx="33" ry="26" fill="#e7ad73" stroke="#9c6645" stroke-width="4"/>
-  <path d="M135 410 Q146 417 159 410 M271 410 Q283 417 296 410" stroke="#ac774c" stroke-width="3" fill="none"/>
-  <g class="milo-earL"><path d="M153 165 Q101 112 103 214 Q100 246 139 246 Q157 222 153 165Z" fill="#a66e4b" stroke="#8f5f44" stroke-width="5"/><path d="M134 177 Q116 171 120 217" fill="none" stroke="#c89472" stroke-width="13" stroke-linecap="round"/></g>
-  <g class="milo-earR"><path d="M283 166 Q331 112 331 211 Q330 246 295 247 Q282 223 283 166Z" fill="#a66e4b" stroke="#8f5f44" stroke-width="5"/><path d="M300 176 Q316 172 313 215" fill="none" stroke="#c89472" stroke-width="13" stroke-linecap="round"/></g>
-  <ellipse cx="219" cy="213" rx="107" ry="105" fill="url(#miloFur)" stroke="#9c6645" stroke-width="5"/>
-  <path d="M157 139 Q167 117 190 131 Q204 110 222 129 Q239 112 251 136" fill="#efbe85" stroke="#9c6645" stroke-width="4" stroke-linecap="round"/>
-  <ellipse cx="172" cy="210" rx="18" ry="21" fill="#553b2e" class="milo-eye"/>
-  <ellipse cx="265" cy="210" rx="18" ry="21" fill="#553b2e" class="milo-eye"/>
-  <circle cx="177" cy="201" r="6" fill="#fff8e9"/><circle cx="270" cy="201" r="6" fill="#fff8e9"/>
-  <ellipse cx="164" cy="242" rx="18" ry="10" fill="#e6957b" opacity=".53"/>
-  <ellipse cx="274" cy="242" rx="18" ry="10" fill="#e6957b" opacity=".53"/>
-  <ellipse cx="218" cy="270" rx="72" ry="49" fill="#f9dfb7"/>
-  <ellipse cx="218" cy="248" rx="22" ry="15" fill="#624537"/>
-  <path class="milo-mouth" d="M218 264 V281 M194 281 Q218 307 243 281" fill="none" stroke="#624537" stroke-width="5" stroke-linecap="round"/>
+  <!-- coda con punta -->
+  <g class="milo-tail"><path d="M302 341 C343 332 366 305 353 273 C347 260 332 258 322 270" fill="none" stroke="#98623e" stroke-width="27" stroke-linecap="round"/><path d="M304 340 C341 329 357 308 346 279" fill="none" stroke="#e8ae71" stroke-width="19" stroke-linecap="round"/><path d="M345 277 Q333 270 324 282" stroke="#f8d4a2" stroke-width="7" stroke-linecap="round"/></g>
+  <!-- corpo non perfettamente sferico e spalle -->
+  <path d="M147 269 C116 284 112 330 133 377 Q153 419 222 419 Q290 424 310 378 C324 339 307 287 277 274Z" fill="url(#miloFur)" stroke="#986645" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M179 298 Q218 279 257 301 C276 330 267 391 225 403 C180 406 161 349 179 298Z" fill="#ffe5bd"/>
+  <!-- zampe anteriori lunghe, riconoscibili -->
+  <path d="M149 344 C137 361 136 386 144 404 Q160 416 179 406 L178 342" fill="#e6a36c" stroke="#996341" stroke-width="4"/>
+  <path d="M264 344 L262 404 Q285 418 298 404 C306 378 297 357 288 342" fill="#e5a16a" stroke="#996341" stroke-width="4"/>
+  <ellipse cx="158" cy="410" rx="32" ry="19" fill="#f1be89" stroke="#996341" stroke-width="4"/>
+  <ellipse cx="284" cy="410" rx="32" ry="19" fill="#f1be89" stroke="#996341" stroke-width="4"/>
+  <path d="M146 406 L146 417 M158 407 L158 420 M278 407 L278 420 M291 406 L292 417" fill="none" stroke="#b78053" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- orecchie pendenti, silhouette allungata -->
+  <g class="milo-earL"><path d="M155 152 C131 130 107 144 100 175 C90 214 107 267 132 271 C155 269 162 242 155 216Z" fill="url(#miloEars)" stroke="#825032" stroke-width="5"/><path d="M133 174 C117 189 116 220 124 242" fill="none" stroke="#ce9265" stroke-width="10" stroke-linecap="round"/></g>
+  <g class="milo-earR"><path d="M276 155 C298 126 321 140 333 171 C347 211 335 259 310 270 C286 269 274 236 278 211Z" fill="url(#miloEars)" stroke="#825032" stroke-width="5"/><path d="M309 173 C322 192 320 224 311 242" fill="none" stroke="#ce9265" stroke-width="10" stroke-linecap="round"/></g>
+  <!-- testa leggermente più larga in alto, guance morbide -->
+  <path d="M213 111 C149 109 118 156 124 208 C124 256 157 300 214 309 C282 316 314 267 311 206 C307 150 276 114 213 111Z" fill="url(#miloFur)" stroke="#986645" stroke-width="5"/>
+  <!-- piccole punte di pelo sulla fronte -->
+  <path d="M171 134 Q177 113 192 128 Q204 108 218 127 Q233 112 246 134" fill="#f8ce96" stroke="#986645" stroke-width="3.3" stroke-linejoin="round"/>
+  <path d="M160 176 Q174 163 190 172 M244 171 Q260 164 274 178" fill="none" stroke="#b77b51" stroke-width="3.5" stroke-linecap="round" opacity=".7"/>
+  <!-- macchietta sul sopracciglio e occhi ovali vivi -->
+  <path d="M254 154 Q274 149 283 165 Q269 160 254 163Z" fill="#c78b59" opacity=".52"/>
+  <ellipse cx="176" cy="201" rx="16.5" ry="21" fill="#47332c" class="milo-eye"/>
+  <ellipse cx="256" cy="201" rx="16.5" ry="21" fill="#47332c" class="milo-eye"/>
+  <circle cx="181" cy="193" r="5.7" fill="#fffaf1"/><circle cx="261" cy="193" r="5.7" fill="#fffaf1"/>
+  <circle cx="170" cy="207" r="2.4" fill="#ad805d"/><circle cx="250" cy="207" r="2.4" fill="#ad805d"/>
+  <!-- due guancette canine che formano un muso proteso in avanti -->
+  <ellipse cx="170" cy="258" rx="45" ry="36" fill="#ffe0b3"/>
+  <ellipse cx="260" cy="258" rx="45" ry="36" fill="#ffe0b3"/>
+  <ellipse cx="216" cy="267" rx="61" ry="43" fill="#ffe6bd"/>
+  <ellipse cx="148" cy="239" rx="13" ry="7" fill="#ed9b89" opacity=".55"/>
+  <ellipse cx="282" cy="239" rx="13" ry="7" fill="#ed9b89" opacity=".55"/>
+  <path d="M193 240 C195 226 237 224 241 240 C245 254 226 263 216 262 C204 262 190 252 193 240Z" fill="#5b3c31"/>
+  <ellipse cx="205" cy="236" rx="8" ry="3.7" fill="#a67a64" opacity=".55"/>
+  <path class="milo-mouth" d="M216 262 L216 279 M193 280 Q213 303 235 280" fill="none" stroke="#75503c" stroke-width="4.5" stroke-linecap="round"/>
+  <ellipse cx="217" cy="298" rx="10" ry="4" fill="#cf9969" opacity=".30"/>
+  <!-- collare riconoscibile, sotto al muso -->
+  <path d="M174 310 Q215 330 262 309" fill="none" stroke="#79a5a7" stroke-width="11" stroke-linecap="round"/>
+  <circle cx="217" cy="329" r="12" fill="#f8d27a" stroke="#bb8e49" stroke-width="3"/>
+  <path d="M212 329 L222 329" stroke="#fff4ce" stroke-width="2.5" stroke-linecap="round"/>
  </g>
- <!-- macchia lieve da lasciare per il futuro bagnetto -->
- <ellipse id="milo-dirt" cx="170" cy="339" rx="27" ry="15" fill="#ac8057" opacity=".48"/>
+ <!-- sporco da mantenere per il futuro bagno -->
+ <g id="milo-dirt" opacity=".65"><ellipse cx="167" cy="349" rx="17" ry="10" fill="#ad8054" opacity=".42"/><ellipse cx="178" cy="356" rx="9" ry="6" fill="#ad8054" opacity=".34"/></g>
  <g id="milo-basket" class="milo-basket">
-   <ellipse cx="357" cy="446" rx="57" ry="15" fill="#9d744d" opacity=".24"/>
-   <path d="M305 371 H410 L401 439 Q356 457 314 439Z" fill="#c78a5c" stroke="#865a41" stroke-width="5" stroke-linejoin="round"/>
-   <path d="M311 389 H406 M316 413 H401" stroke="#edc49d" stroke-width="5"/>
-   <path d="M330 374 L337 438 M356 373 V446 M383 374 L375 440" stroke="#a56c48" stroke-width="5"/>
-   <ellipse cx="357" cy="372" rx="55" ry="11" fill="#eac498" stroke="#865a41" stroke-width="5"/>
+  <ellipse cx="355" cy="448" rx="55" ry="12" fill="#987047" opacity=".2"/>
+  <path d="M307 376 H405 L396 441 Q355 454 316 441Z" fill="url(#miloBasket)" stroke="#8f6244" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M311 395 H401 M317 416 H396" stroke="#f5d2a0" stroke-width="4.5"/>
+  <path d="M332 383 L337 442 M356 383 V446 M383 383 L377 443" fill="none" stroke="#af744b" stroke-width="5"/>
+  <ellipse cx="356" cy="376" rx="52" ry="11" fill="#f1c78d" stroke="#8f6244" stroke-width="5"/>
+  <ellipse cx="356" cy="376" rx="40" ry="5.5" fill="#ab7449" opacity=".55"/>
  </g>
  <g id="milo-leaves"></g>
  <g id="milo-effects" pointer-events="none"></g>
@@ -2896,43 +2920,107 @@ function showMiloIntro(){
  miloAddTouch(ui);
  miloButton(ui.actions,'Aiutiamo Milo!',showMiloLeaves);
 }
-const MILO_LEAF_SHAPES=[
- `<path d="M0 -22 Q22 -14 17 8 Q8 25 -7 18 Q-25 6 0 -22Z" fill="#77aa59" stroke="#4d7a3f" stroke-width="3"/><path d="M0 14 Q5 -1 2 -15" stroke="#eaf2af" stroke-width="3" fill="none"/>`,
- `<path d="M-19 -17 Q-5 -29 13 -13 Q27 8 2 20 Q-19 12 -19 -17Z" fill="#e4a057" stroke="#ad6b3b" stroke-width="3"/><path d="M-14 -13 Q2 -2 6 15" stroke="#fff0be" stroke-width="3" fill="none"/>`,
- `<path d="M-14 -19 Q9 -31 20 -10 Q26 10 -3 20 Q-22 4 -14 -19Z" fill="#93ba6d" stroke="#638e53" stroke-width="3"/><path d="M-12 -13 Q0 3 -2 14" stroke="#e4f3c0" stroke-width="3" fill="none"/>`
+const MILO_LEAF_PALETTE=[
+ {fill:'#83b76d',stroke:'#4e824c',vein:'#e1f0b4'},
+ {fill:'#edbd58',stroke:'#bd873a',vein:'#fff1b1'},
+ {fill:'#dd8754',stroke:'#a65d3b',vein:'#f9d8a0'},
+ {fill:'#c96b60',stroke:'#96484a',vein:'#f5c0a9'},
+ {fill:'#94b39a',stroke:'#547f6d',vein:'#e7f3c9'},
+ {fill:'#9bbb5e',stroke:'#638a3e',vein:'#eaf1bb'}
 ];
+const MILO_LEAF_POSITIONS=[
+ {x:158,y:157,tag:'ear'}, {x:281,y:162,tag:'ear'},
+ {x:134,y:237,tag:'head'}, {x:294,y:246,tag:'head'},
+ {x:156,y:335,tag:'tail'}, {x:282,y:351,tag:'tail'},
+ {x:203,y:352,tag:'head'}, {x:343,y:301,tag:'tail'}
+];
+function miloRand(n){return Math.floor(Math.random()*n)}
+function miloShuffle(a){const b=a.slice();for(let i=b.length-1;i>0;i--){const j=miloRand(i+1);[b[i],b[j]]=[b[j],b[i]]}return b}
+function miloLeafMarkup(leaf){
+ if(leaf.stick)return `<path d="M-5 -24 Q1 -6 2 19" fill="none" stroke="#89613f" stroke-width="7" stroke-linecap="round"/><path d="M0 -6 Q-18 -22 -23 -12 Q-23 -2 -3 5Z" fill="#a27e4b" stroke="#80613f" stroke-width="2"/>`;
+ const c=MILO_LEAF_PALETTE[leaf.color];
+ return `<path d="M0 -25 C8 -21 24 -10 21 6 C18 22 -4 25 -14 15 C-26 2 -14 -18 0 -25Z" fill="${c.fill}" stroke="${c.stroke}" stroke-width="3.3" stroke-linejoin="round"/><path d="M-8 14 Q4 3 2 -18 M1 2 L13 -3 M-1 8 L-13 -4" stroke="${c.vein}" stroke-width="2.7" fill="none" stroke-linecap="round"/>`;
+}
 function showMiloLeaves(){
- MILO.phase='leaves';MILO.leaves=[{x:151,y:149,type:0},{x:289,y:304,type:1},{x:163,y:342,type:2}];
- const ui=miloMakeWorld('Togliamo le foglioline!','Tocca una foglia o portala nel cestino',showMiloIntro);
+ MILO.phase='leaves';
+ const count=3+miloRand(2);
+ const positions=miloShuffle(MILO_LEAF_POSITIONS).slice(0,count);
+ const colors=miloShuffle(MILO_LEAF_PALETTE.map((_,i)=>i));
+ MILO.leaves=positions.map((p,i)=>({...p,color:colors[i],angle:-55+miloRand(111),stick:count===4&&i===3&&Math.random()<.42,done:false}));
+ const ui=miloMakeWorld('Togliamo le foglioline!',`0 di ${count} raccolte · Tocca oppure trascina nel cestino`,showMiloIntro);
  const layer=ui.svg.querySelector('#milo-leaves');
- const poses=[-25,32,-42];let finished=0,hintTimer=null;
- const make=(leaf,i)=>{
-  const ns='http://www.w3.org/2000/svg';const g=document.createElementNS(ns,'g');g.classList.add('milo-leaf');g.setAttribute('role','button');g.setAttribute('tabindex','0');g.setAttribute('aria-label','Togli una fogliolina');g.innerHTML=`<g transform="rotate(${poses[i]})">${MILO_LEAF_SHAPES[leaf.type]}</g><circle r="39" fill="transparent"/>`;
-  g.setAttribute('transform',`translate(${leaf.x} ${leaf.y})`);layer.appendChild(g);
-  let sx,sy,startX,startY,drag=false;
-  const release=()=>{
-   if(g.dataset.done)return;g.dataset.done='1';g.style.pointerEvents='none';
-   const from= g.getAttribute('transform');
-   const anim=g.animate([{transform:'translate(0px,0px)',opacity:1},{transform:`translate(${(357-(leaf.x+(leaf.dx||0)))*ui.svg.clientWidth/440}px,${(370-(leaf.y+(leaf.dy||0)))*ui.svg.clientHeight/485}px) rotate(280deg) scale(.35)`,opacity:.25}],{duration:520,easing:'ease-in',fill:'forwards'});
-   pop();miloReact(ui,i===0?'ear':'tail');
-   anim.onfinish=()=>{g.remove();finished++;MILO.leaves[i].done=true;ui.heading.querySelector('small').textContent=`${finished} di 3 foglioline!`;
-    if(finished===3){ding();miloCelebrate(ui);setTimeout(showMiloComplete,1200)}else scheduleHint();};
-  };
-  g.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();if(g.dataset.done)return;clearTimeout(hintTimer);g.setPointerCapture(e.pointerId);const p=miloPoint(ui.svg,e);sx=p.x;sy=p.y;startX=leaf.dx||0;startY=leaf.dy||0;drag=false;g.style.opacity='1'});
-  g.addEventListener('pointermove',e=>{if(!g.hasPointerCapture(e.pointerId)||g.dataset.done)return;const p=miloPoint(ui.svg,e);leaf.dx=startX+p.x-sx;leaf.dy=startY+p.y-sy;drag=drag||Math.hypot(p.x-sx,p.y-sy)>9;g.setAttribute('transform',`translate(${leaf.x+leaf.dx} ${leaf.y+leaf.dy})`);ui.svg.querySelector('#milo-basket').classList.toggle('active',Math.hypot(leaf.x+leaf.dx-357,leaf.y+leaf.dy-375)<95)});
-  g.addEventListener('pointerup',e=>{ui.svg.querySelector('#milo-basket').classList.remove('active');if(g.dataset.done)return;
-   // Tocco semplice o trascinamento: entrambi valgono. Nessuna precisione richiesta.
-   release();});
-  g.addEventListener('pointercancel',()=>{ui.svg.querySelector('#milo-basket').classList.remove('active');g.setAttribute('transform',`translate(${leaf.x} ${leaf.y})`)});
-  g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();release()}});
- };
- MILO.leaves.forEach(make);
- miloAddTouch(ui);
- function scheduleHint(){clearTimeout(hintTimer);hintTimer=setTimeout(()=>{
-  if(!ui.world.isConnected)return;const l=layer.querySelector('.milo-leaf:not([data-done])');
-  if(l){l.animate([{opacity:1},{opacity:.45,transform:'scale(1.08)'},{opacity:1}],{duration:950,iterations:2});}
- },6200)}
- scheduleHint();
+ const basket=ui.svg.querySelector('#milo-basket');
+ const ns='http://www.w3.org/2000/svg';
+ let finished=0,hintTimer=null,active=false;
+ const basketX=355,basketY=376;
+ const scheduleHint=()=>{clearTimeout(hintTimer);hintTimer=setTimeout(()=>{
+  if(!ui.world.isConnected || active)return;
+  const l=layer.querySelector('.milo-leaf:not([data-done])');
+  if(l){l.querySelector('.milo-leaf-body').animate([{opacity:1},{opacity:.55},{opacity:1}],{duration:650,iterations:2});}
+ },6000)};
+ function completeLeaf(leaf,g,i,from){
+  if(leaf.done)return;
+  leaf.done=true;g.dataset.done='1';g.style.pointerEvents='none';active=true;
+  basket.classList.add('active');pop();miloReact(ui,leaf.tag);
+  // Posizione e rotazione nello stesso sistema di coordinate SVG: nessun salto nell'angolo.
+  const tx=basketX-2+miloRand(13)-6,ty=basketY+3;
+  const sx=from.x,sy=from.y,start=performance.now();
+  const duration=620;let last=0;
+  const body=g.querySelector('.milo-leaf-body');
+  function frame(now){
+   if(!g.isConnected)return;
+   const t=Math.min(1,(now-start)/duration),ease=t*t*(3-2*t);
+   const xx=sx+(tx-sx)*ease;
+   const yy=sy+(ty-sy)*ease-46*Math.sin(Math.PI*t);
+   const spin=leaf.angle+430*t;
+   g.setAttribute('transform',`translate(${xx.toFixed(2)} ${yy.toFixed(2)})`);
+   body.setAttribute('transform',`rotate(${spin.toFixed(2)}) scale(${(1-.70*ease).toFixed(3)})`);
+   g.style.opacity=t<.85?'1':String(Math.max(0,1-(t-.85)/.15));
+   if(t<1){requestAnimationFrame(frame);return}
+   g.remove();active=false;basket.classList.remove('active');
+   finished++;
+   ui.heading.querySelector('small').textContent=`${finished} di ${count} raccolte · Bravo Milo!`;
+   if(finished===count){ding();miloCelebrate(ui);setTimeout(()=>{if(ui.world.isConnected)showMiloComplete()},1200)}
+   else scheduleHint();
+  }
+  requestAnimationFrame(frame);
+ }
+ MILO.leaves.forEach((leaf,i)=>{
+  const g=document.createElementNS(ns,'g');g.classList.add('milo-leaf');
+  g.setAttribute('role','button');g.setAttribute('tabindex','0');
+  g.setAttribute('aria-label',leaf.stick?'Raccogli il rametto':'Raccogli la fogliolina');
+  g.setAttribute('transform',`translate(${leaf.x} ${leaf.y})`);
+  g.innerHTML=`<g class="milo-leaf-body" transform="rotate(${leaf.angle})">${miloLeafMarkup(leaf)}</g><circle r="36" fill="transparent"/>`;
+  layer.appendChild(g);
+  let sx=0,sy=0,downX=0,downY=0,drag=false;
+  g.addEventListener('pointerdown',e=>{
+   if(leaf.done || active)return;
+   e.preventDefault();e.stopPropagation();clearTimeout(hintTimer);
+   g.setPointerCapture(e.pointerId);
+   const p=miloPoint(ui.svg,e);sx=p.x;sy=p.y;downX=leaf.x;downY=leaf.y;drag=false;
+  });
+  g.addEventListener('pointermove',e=>{
+   if(leaf.done || !g.hasPointerCapture(e.pointerId))return;
+   const p=miloPoint(ui.svg,e);let dx=p.x-sx,dy=p.y-sy;
+   if(Math.hypot(dx,dy)>9)drag=true;
+   if(drag){
+    const x=Math.max(25,Math.min(415,downX+dx)),y=Math.max(22,Math.min(455,downY+dy));
+    g.setAttribute('transform',`translate(${x} ${y})`);
+    basket.classList.toggle('active',Math.hypot(x-basketX,y-basketY)<95);
+   }
+  });
+  g.addEventListener('pointerup',e=>{
+   if(leaf.done)return;
+   basket.classList.remove('active');
+   const transform=g.getAttribute('transform');
+   const match=transform.match(/translate\(([-\d.]+)[ ,]([-\d.]+)\)/);
+   const from=match?{x:+match[1],y:+match[2]}:{x:leaf.x,y:leaf.y};
+   completeLeaf(leaf,g,i,from);
+  });
+  g.addEventListener('pointercancel',()=>{if(leaf.done)return;basket.classList.remove('active');g.setAttribute('transform',`translate(${leaf.x} ${leaf.y})`);scheduleHint()});
+  g.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&!leaf.done){e.preventDefault();completeLeaf(leaf,g,i,{x:leaf.x,y:leaf.y})}});
+ });
+ miloAddTouch(ui);scheduleHint();
  miloButton(ui.actions,'Ricomincia',showMiloLeaves,true);
 }
 function miloCelebrate(ui){
@@ -2941,7 +3029,7 @@ function miloCelebrate(ui){
 }
 function showMiloComplete(){
  MILO.phase='complete';
- const ui=miloMakeWorld('Bravissima, Milo è felice!','Le foglioline sono tutte nel cestino!',showAnimali);
+ const ui=miloMakeWorld('Bravissima, Milo è felice!','Tutte le foglioline sono nel cestino!',showAnimali);
  miloAddTouch(ui);miloReact(ui,'head');
  miloButton(ui.actions,'Gioca ancora',showMiloLeaves);
  miloButton(ui.actions,'Torna agli animali',showAnimali,true);
@@ -2950,6 +3038,135 @@ function showMiloComplete(){
 function miloRestoreHeader(){ $('#title').style.display='';$('#dots').style.display=''; }
 const _oldScreen=screen;
 screen=function(...args){miloRestoreHeader();return _oldScreen(...args)};
+
+/* MILO v4 — storia completa, grafica illustrata e interazioni touch */
+const MV4CSS=`
+.mv4{position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;align-items:center;overflow:hidden;background:linear-gradient(155deg,#fff4df,#edce9d);font-family:Fredoka,system-ui,sans-serif;padding:calc(env(safe-area-inset-top,0px) + 70px) 9px calc(env(safe-area-inset-bottom,0px) + 8px)}
+.mv4-top{z-index:3;background:#fffbf3ee;border:3px solid #dbac7c;border-radius:23px;padding:7px 14px;box-shadow:0 4px 0 #c58b6140;text-align:center;max-width:98%;color:#74503c}
+.mv4-top strong{font-size:clamp(19px,3.3vw,27px);display:block}.mv4-top span{font-size:clamp(12px,2vw,17px)}
+.mv4-board{position:relative;flex:1;min-height:0;width:min(100%,660px);display:grid;place-items:center;touch-action:none}
+.mv4-canvas{width:100%;height:100%;display:block;touch-action:none;overflow:hidden}
+.mv4-footer{z-index:3;display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;padding:5px 0;min-height:66px;width:100%}
+.mv4-btn{background:#f6a269;border:3px solid #fff6e6;color:#65391e;border-radius:23px;padding:11px 17px;min-height:54px;min-width:110px;box-shadow:0 5px 0 #c77d48;font:700 clamp(16px,3vw,22px) Fredoka,system-ui;cursor:pointer;touch-action:manipulation}
+.mv4-btn.alt{background:#fff8e9;box-shadow:0 4px 0 #dbc3a0}.mv4-btn:active{transform:translateY(3px);box-shadow:0 2px 0 #bc7e48}
+.mv4-progress{display:flex;gap:6px;align-items:center;justify-content:center;margin:6px auto 0}.mv4-progress i{display:block;width:10px;height:10px;border-radius:50%;background:#d9c7ae}.mv4-progress i.ok{background:#92b976}.mv4-progress i.now{background:#f09c5b;transform:scale(1.25)}
+.mv4-character{transform-origin:500px 730px;animation:mv4-breathe 3.8s ease-in-out infinite;pointer-events:none}.mv4-character.busy{animation-play-state:paused}
+.mv4-eye{transform-origin:center;animation:mv4-blink 6.5s ease-in-out infinite}
+.mv4-animated{animation:mv4-drift 2.5s ease-in-out infinite alternate}
+.mv4-sway{transform-origin:500px 760px;animation:mv4-sway 7s ease-in-out infinite alternate}
+.mv4-item{cursor:grab;touch-action:none;pointer-events:all}.mv4-item:active{cursor:grabbing}
+.mv4-hint{animation:mv4-hint 1s ease-in-out infinite alternate;pointer-events:none}
+.mv4-float{animation:mv4-float .9s ease-out forwards;pointer-events:none}
+.mv4-screen-flash{animation:mv4-flash .55s ease-out forwards;pointer-events:none}
+@keyframes mv4-breathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes mv4-blink{0%,94%,98%,100%{transform:scaleY(1)}96%{transform:scaleY(.08)}}
+@keyframes mv4-drift{to{transform:translate(4px,-7px) rotate(4deg)}}
+@keyframes mv4-sway{to{transform:rotate(1deg)}}
+@keyframes mv4-hint{to{opacity:.4;transform:translateY(-8px)}}
+@keyframes mv4-float{to{opacity:0;transform:translateY(-70px) scale(1.4)}}
+@keyframes mv4-flash{to{opacity:0}}
+@media(max-height:650px){.mv4{padding-top:55px}.mv4-top{padding:4px 9px}.mv4-top span{display:none}.mv4-footer{min-height:46px}.mv4-btn{min-height:43px;padding:6px 10px}}
+`;
+{let st=document.createElement('style');st.textContent=MV4CSS;document.head.appendChild(st)}
+const MV4={phase:'intro',spots:[],leaves:[],finished:0,accessory:'',decor:'',locked:false,seed:0,run:0,tool:'',soaped:false,wet:0,brush:0};
+const mv4ns='http://www.w3.org/2000/svg';
+const mv4R=(a,b)=>a+Math.random()*(b-a);
+const mv4Pick=a=>a[Math.floor(Math.random()*a.length)];
+function mv4Node(parent,tag,attrs={},html){const n=document.createElementNS(mv4ns,tag);Object.entries(attrs).forEach(([k,v])=>n.setAttribute(k,String(v)));if(html!==undefined)n.innerHTML=html;parent.appendChild(n);return n}
+function mv4Audio(which){if(MUT)return;try{switch(which){case 'step':thump(210,65,.095,.12);nz(.075,{f:460,q:.6,v:.095});break;case 'leaves':nz(.18,{f:2300,q:.35,v:.18});snd(720,.065,'triangle',.045);break;case 'splash':nz(.38,{f:1100,q:.45,v:.25});thump(270,80,.16,.17);break;case 'bath':nz(.19,{f:1500,q:.6,v:.14});snd(850,.09,'sine',.045);break;case 'dry':nz(.38,{f:400,q:.35,v:.13});snd(120,.19,'triangle',.025);break;case 'brush':nz(.12,{f:920,q:.8,v:.065});break;case 'photo':snd(1040,.12,'sine',.10);snd(1560,.14,'sine',.06,.06);break;case 'joy':ding();break;default:snd(530,.10,'triangle',.04);}}catch(e){}}
+function mv4Main(title,sub,back){screen('', '',back||showAnimali);$('#title').style.display='none';$('#dots').style.display='none';
+ const w=el(stage,'mv4');const head=el(w,'mv4-top',`<strong>${title}</strong><span>${sub||''}</span>`);const board=el(w,'mv4-board');const foot=el(w,'mv4-footer');
+ const svg=mv4Node(board,'svg',{viewBox:'0 0 1000 1000',class:'mv4-canvas',preserveAspectRatio:'xMidYMid meet'});
+ const defs=mv4Node(svg,'defs');defs.innerHTML=`<linearGradient id="mv4wall" x2="0" y2="1"><stop stop-color="#fff9e8"/><stop offset="1" stop-color="#f8d8a6"/></linearGradient>`;
+ mv4Node(svg,'rect',{x:13,y:12,width:974,height:974,rx:67,fill:'url(#mv4wall)',stroke:'#d6aa7d','stroke-width':10});
+ const bg=mv4Node(svg,'g',{'data-part':'background'});
+ const animal=mv4Node(svg,'g',{class:'mv4-character'});
+ mv4Node(animal,'image',{href:'./assets/milo.png',x:130,y:105,width:740,height:815,preserveAspectRatio:'xMidYMid meet'});
+ const coat=mv4Node(animal,'g',{'data-part':'coat'}); const props=mv4Node(animal,'g',{'data-part':'props'});
+ const effects=mv4Node(svg,'g',{'data-part':'effects'});
+ const overlay=mv4Node(svg,'g',{'data-part':'tools'});
+ const pips=el(head,'mv4-progress');['leaves','soap','rinse','dry','brush','dress','photo'].forEach((x,i)=>{const n=el(pips,'');n.tagName;n.outerHTML=`<i class="${MV4.phase===x?'now':''}"></i>`});
+ const ch=()=>{if(!w.isConnected)return;animal.classList.add('busy');animal.animate([{transform:'rotate(0deg)'},{transform:'rotate(-2deg)'},{transform:'rotate(2deg)'},{transform:'rotate(0deg)'}],{duration:480}).onfinish=()=>animal.classList.remove('busy')};
+ const touch=e=>{if(e.target.closest('.mv4-item'))return;const pt=mv4Coord(svg,e);if(pt.y>250&&pt.y<760&&pt.x>270&&pt.x<715){ch();mv4Audio('joy')}};
+ svg.addEventListener('pointerdown',touch);
+ return {w,head,svg,bg,animal,coat,props,effects,overlay,foot,ch,board};
+}
+function mv4Coord(svg,e){const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse())}
+function mv4Btn(ui,label,fn,alt=false){const b=el(ui.foot,'',null);b.tagName;b.remove();let n=document.createElement('button');n.className='mv4-btn'+(alt?' alt':'');n.textContent=label;ui.foot.appendChild(n);n.onclick=()=>{mv4Audio('step');fn()};return n}
+function mv4Backdrop(ui,kind){const b=ui.bg;b.innerHTML='';if(kind==='garden'){
+ mv4Node(b,'path',{d:'M25 745 Q260 670 500 742 Q760 670 978 729 L978 944 H25Z',fill:'#c9dea1'});
+ mv4Node(b,'circle',{cx:815,cy:143,r:58,fill:'#ffe5a1'});
+ for(let i=0;i<6;i++){let x=80+i*155;mv4Node(b,'path',{d:`M${x} 732 v-135`,stroke:'#9fb981','stroke-width':14,'stroke-linecap':'round'});mv4Node(b,'circle',{cx:x,cy:585,r:35,fill:i%2?'#9eca8a':'#aed5a2'})}
+ }else if(kind==='bath'){
+ mv4Node(b,'rect',{x:28,y:725,width:946,height:235,rx:35,fill:'#d7ecdf'});
+ for(let i=0;i<8;i++)mv4Node(b,'path',{d:`M${35+i*125} 738 V955`,stroke:'#c7dfd8','stroke-width':5});
+ mv4Node(b,'path',{d:'M180 760 Q500 830 820 760 L782 915 Q500 974 218 915Z',fill:'#a9d7df',stroke:'#6baab9','stroke-width':13});
+ }else{mv4Node(b,'path',{d:'M27 802 H972',stroke:'#dfbe93','stroke-width':13});mv4Node(b,'ellipse',{cx:502,cy:922,rx:366,ry:65,fill:'#fffdf5',stroke:'#e9ceb0','stroke-width':9});}
+}
+function mv4Label(ui,str){ui.head.querySelector('span').textContent=str}
+function mv4Story(title,sub,kind,frames,next){MV4.phase='story';const ui=mv4Main(title,sub,showAnimali);mv4Backdrop(ui,kind);
+ const words=mv4Node(ui.overlay,'g');const msg=mv4Node(words,'text',{x:500,y:82,'text-anchor':'middle',fill:'#76513c','font-family':'Fredoka,system-ui','font-size':38,'font-weight':700});
+ let i=0;const show=()=>{if(!ui.w.isConnected)return;msg.textContent=frames[i].text;ui.animal.animate([{opacity:.45,transform:'translateX(-20px)'},{opacity:1,transform:'translateX(0px)'}],{duration:500});
+ if(i===frames.length-1){mv4Audio(frames[i].sound||'joy')}
+ else mv4Audio(frames[i].sound||'step');};show();
+ const advance=()=>{if(!ui.w.isConnected)return;if(i<frames.length-1){i++;show()}else next()};
+ let tid=setInterval(()=>{if(!ui.w.isConnected){clearInterval(tid);return}advance()},1150);
+ mv4Btn(ui,'Continua ▶',()=>{clearInterval(tid);advance()});
+ ui.w.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;clearInterval(tid);advance()},{once:true});
+}
+const mv4BodyZones=[{x:322,y:372,part:'head'},{x:657,y:347,part:'head'},{x:350,y:642,part:'body'},{x:643,y:653,part:'body'},{x:495,y:750,part:'body'},{x:790,y:665,part:'tail'},{x:412,y:465,part:'head'},{x:559,y:521,part:'head'}];
+function mv4Reset(){MV4.seed++;MV4.phase='intro';MV4.leaves=[];MV4.spots=[];MV4.accessory='';MV4.decor='';MV4.wet=0;MV4.brush=0;MV4.soaped=false;MV4.finished=0;}
+function showMiloIntro(){mv4Reset();const ui=mv4Main('Ciao, sono Milo!','Accarezzami e partiamo insieme!',showAnimali);mv4Backdrop(ui,'room');mv4Btn(ui,'Andiamo in giardino!',()=>mv4Story('Milo in giardino','Guarda cosa combina!', 'garden',[{text:'Milo esce a giocare!',sound:'step'},{text:'Corre tra le foglie!',sound:'leaves'},{text:'Oh! Le foglie si attaccano!',sound:'leaves'}],mv4Leaves));}
+function mv4LeafShape(color){return `<path d="M0 -28 Q30 -10 22 13 Q-3 31 -23 13 Q-33 -11 0 -28Z" fill="${color}" stroke="#8c6f43" stroke-width="3"/><path d="M-10 15 Q5 0 1 -20 M0 1 L16 -5" fill="none" stroke="#fff3b0" stroke-width="3"/>`}
+function mv4Leaves(){MV4.phase='leaves';MV4.leaves=[];const ui=mv4Main('Togli le foglioline!','Tocca le foglie: voleranno nel cestino!',showMiloIntro);mv4Backdrop(ui,'garden');
+ const basket=mv4Node(ui.overlay,'g');basket.innerHTML=`<ellipse cx="850" cy="817" rx="116" ry="34" fill="#8d613e"/><path d="M741 812H955L928 934Q850 967 766 934Z" fill="#c99462" stroke="#93603c" stroke-width="10"/><ellipse cx="850" cy="805" rx="118" ry="25" fill="#efc289" stroke="#93603c" stroke-width="9"/><ellipse cx="850" cy="805" rx="85" ry="13" fill="#9a6b43"/>`;
+ const count=3+Math.floor(Math.random()*2),spots=mv4BodyZones.slice().sort(()=>Math.random()-.5).slice(0,count);let done=0; const colors=['#8eb65a','#dba454','#dd8060','#b7c769','#e4c55e'];
+ spots.forEach((spot,k)=>{let lx=spot.x,ly=spot.y;const g=mv4Node(ui.props,'g',{class:'mv4-item',transform:`translate(${lx} ${ly})`},`<g transform="rotate(${mv4R(-45,45)})">${mv4LeafShape(mv4Pick(colors))}</g><circle r="51" fill="transparent"/>`);let moving=false,start=null,off=0;
+ const send=()=>{if(moving)return;moving=true;g.style.pointerEvents='none';mv4Audio('leaves');const p=new DOMPoint(lx,ly),target={x:845+mv4R(-22,22),y:807};const begin=performance.now();const fly=t=>{if(!g.isConnected)return;const a=Math.min(1,(t-begin)/720),ease=a*a*(3-2*a);g.setAttribute('transform',`translate(${p.x+(target.x-p.x)*ease} ${p.y+(target.y-p.y)*ease-86*Math.sin(Math.PI*a)}) rotate(${400*a}) scale(${1-.5*ease})`);if(a<1)requestAnimationFrame(fly);else{g.remove();done++;mv4Label(ui,`${done} di ${count} raccolte`);if(done===count)setTimeout(()=>{if(ui.w.isConnected)mv4Story('Milo trova una pozzanghera!','Oh oh, che combinaguai!', 'garden',[{text:'Una bella pozzanghera!',sound:'step'},{text:'Splash! Milo salta nel fango!',sound:'splash'},{text:'Adesso facciamo il bagnetto!',sound:'joy'}],mv4Soap)},850)}};requestAnimationFrame(fly)};
+ g.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();g.setPointerCapture(e.pointerId);start=mv4Coord(ui.svg,e);});
+ g.addEventListener('pointermove',e=>{if(!start||moving)return;const p=mv4Coord(ui.svg,e);g.setAttribute('transform',`translate(${spot.x+p.x-start.x} ${spot.y+p.y-start.y})`);lx=spot.x+p.x-start.x;ly=spot.y+p.y-start.y});
+ g.addEventListener('pointerup',send);g.addEventListener('pointercancel',()=>{start=null;g.setAttribute('transform',`translate(${spot.x} ${spot.y})`)});
+ }); mv4Label(ui,`0 di ${count} raccolte`);mv4Btn(ui,'Ricomincia',showMiloIntro,true);
+}
+function mv4Patch(ui,variant,count=4){const xs=mv4BodyZones.slice().sort(()=>Math.random()-.5).slice(0,count);return xs.map((p,i)=>{let e=mv4Node(ui.coat,'g',{transform:`translate(${p.x} ${p.y})`});if(variant==='mud'){mv4Node(e,'ellipse',{rx:mv4R(28,42),ry:mv4R(19,34),fill:'#85582d',opacity:.86});mv4Node(e,'ellipse',{cx:-8,cy:-8,rx:12,ry:7,fill:'#ab7847',opacity:.75})}
+ else if(variant==='foam'){for(let k=0;k<5;k++)mv4Node(e,'circle',{cx:mv4R(-25,25),cy:mv4R(-18,18),r:mv4R(12,20),fill:'#fffefa',stroke:'#c7e4ee','stroke-width':3})}
+ else if(variant==='water')mv4Node(e,'path',{d:'M0 -24 Q24 4 0 30 Q-23 3 0 -24Z',fill:'#91d4ed',stroke:'#fff','stroke-width':4});
+ else if(variant==='tuft')mv4Node(e,'path',{d:'M-28 11 Q-17 -26 -5 -17 Q5 -53 15 -15 Q33 -36 30 12Z',fill:'#e5a658',stroke:'#97582e','stroke-width':5});
+ return {x:p.x,y:p.y,e,done:false}})}
+function mv4TouchZones(ui,objects,tool,each,done,next){let active=false,dragged=false;const overlay=mv4Node(ui.overlay,'rect',{x:30,y:90,width:940,height:870,fill:'transparent',class:'mv4-item'});let brush=mv4Node(ui.overlay,'g',{style:'pointer-events:none'},'');brush.innerHTML=tool;brush.style.display='none';
+ function hit(x,y){let result=null,d=1e9;objects.forEach(q=>{if(q.done)return;let dist=Math.hypot(q.x-x,q.y-y);if(dist<d){result=q;d=dist}});return d<110?result:null}
+ function move(e){if(!active)return;const p=mv4Coord(ui.svg,e);brush.setAttribute('transform',`translate(${p.x} ${p.y})`);dragged=true;let obj=hit(p.x,p.y);if(obj){obj.done=true;each(obj,p);mv4Audio('bath');if(objects.every(o=>o.done)){overlay.remove();brush.remove();mv4Audio('joy');setTimeout(()=>{if(ui.w.isConnected)next()},800)}}}
+ overlay.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();active=true;dragged=false;overlay.setPointerCapture(e.pointerId);brush.style.display='';move(e)});
+ overlay.addEventListener('pointermove',move);overlay.addEventListener('pointerup',()=>{active=false;brush.style.display='none'});overlay.addEventListener('pointercancel',()=>{active=false;brush.style.display='none'});
+}
+function mv4Soap(){MV4.phase='soap';const ui=mv4Main('Milo si è sporcato!','Passa la spugna sulle macchie di fango',showMiloIntro);mv4Backdrop(ui,'bath');const spots=mv4Patch(ui,'mud',5);
+ mv4TouchZones(ui,spots,`<rect x="-52" y="-34" width="104" height="68" rx="23" fill="#ffdc70" stroke="#b68a42" stroke-width="7"/><circle cx="-12" cy="-9" r="7" fill="#fff4be"/>`,o=>{o.e.remove();let f=mv4Node(ui.coat,'g',{transform:`translate(${o.x} ${o.y})`});for(let k=0;k<5;k++)mv4Node(f,'circle',{cx:mv4R(-27,27),cy:mv4R(-18,18),r:mv4R(13,21),fill:'#fffdf5',stroke:'#c8e8ed','stroke-width':3});MV4.spots.push(f)},null,mv4Rinse);
+ mv4Btn(ui,'Ricomincia',showMiloIntro,true)}
+function mv4Rinse(){MV4.phase='rinse';const ui=mv4Main('Via tutta la schiuma!','Muovi la doccetta sul corpo di Milo',showMiloIntro);mv4Backdrop(ui,'bath');MV4.spots=[];const foams=mv4Patch(ui,'foam',5);
+ mv4TouchZones(ui,foams,`<g transform="rotate(-25)"><rect x="-29" y="-54" width="58" height="55" rx="14" fill="#a5c5d3" stroke="#678998" stroke-width="7"/><path d="M-55 -48H55" stroke="#678998" stroke-width="16" stroke-linecap="round"/><path d="M-20 6v60M0 6v77M20 6v62" stroke="#76c8ef" stroke-width="7" stroke-linecap="round"/></g>`,o=>{o.e.remove();mv4Node(ui.effects,'circle',{cx:o.x,cy:o.y,r:29,fill:'#a5dff4',opacity:.5,class:'mv4-float'})},null,()=>mv4Story('Che scrollata!','Milo è pulito ma tutto bagnato!', 'bath',[{text:'Splash! Le ultime gocce!',sound:'splash'},{text:'Prendiamo un asciugamano!',sound:'dry'}],mv4Towel));mv4Btn(ui,'Ricomincia',showMiloIntro,true)
+}
+function mv4Towel(){MV4.phase='dry';const ui=mv4Main('Asciughiamo Milo!','Passa l’asciugamano sulle goccioline',showMiloIntro);mv4Backdrop(ui,'bath');const drops=mv4Patch(ui,'water',5);
+ mv4TouchZones(ui,drops,`<rect x="-73" y="-44" width="146" height="88" rx="16" fill="#f9e9ae" stroke="#d4a977" stroke-width="8"/><path d="M-50 -14H50M-50 14H50" stroke="#edd59b" stroke-width="5"/>`,o=>{o.e.remove()},null,mv4Dryer);mv4Btn(ui,'Ricomincia',showMiloIntro,true)}
+function mv4Dryer(){MV4.phase='dry';const ui=mv4Main('Un soffio di aria tiepida!','Muovi il phon per asciugare Milo',showMiloIntro);mv4Backdrop(ui,'room');const areas=mv4BodyZones.slice(0,5).map(p=>({...p,done:false}));
+ mv4TouchZones(ui,areas,`<g><rect x="-34" y="-44" width="80" height="70" rx="17" fill="#ed9d80" stroke="#af6b5a" stroke-width="7"/><rect x="-3" y="23" width="27" height="74" rx="10" fill="#eac2b5" stroke="#af6b5a" stroke-width="6"/><path d="M-75 -32 H-30V11H-75Z" fill="#8fbbc3" stroke="#5f929c" stroke-width="7"/><path d="M-100 -30v34M-120 -30v34" stroke="#9ed8e6" stroke-width="7" stroke-linecap="round"/></g>`,o=>{mv4Node(ui.effects,'path',{d:`M${o.x-18} ${o.y}q18 -32 40 0`,stroke:'#d5e9f5','stroke-width':12,fill:'none',class:'mv4-float'});mv4Audio('dry')},null,()=>mv4Story('Ops! Che capigliatura!','Il pelo è soffice ma spettinato', 'room',[{text:'Il phon ha arruffato Milo!',sound:'dry'},{text:'Prendiamo la spazzola!',sound:'joy'}],mv4Brush));mv4Btn(ui,'Ricomincia',showMiloIntro,true)}
+function mv4Brush(){MV4.phase='brush';const ui=mv4Main('Pettiniamo Milo!','Sistema i ciuffetti con la spazzola',showMiloIntro);mv4Backdrop(ui,'room');const tufts=mv4Patch(ui,'tuft',4);
+ mv4TouchZones(ui,tufts,`<rect x="-48" y="-25" width="96" height="50" rx="18" fill="#dda76e" stroke="#986340" stroke-width="7"/><path d="M-32 23v43M-16 23v43M0 23v43M16 23v43M32 23v43" stroke="#946446" stroke-width="7" stroke-linecap="round"/>`,o=>{o.e.remove();mv4Node(ui.effects,'text',{x:o.x,y:o.y,'font-size':42,fill:'#e5b45a',class:'mv4-float'},'✦')},null,()=>mv4Story('Milo è tutto pulito!','Ora è pronto per vestirsi!', 'room',[{text:'Il pelo è bello morbido!',sound:'brush'},{text:'Scegliamo un accessorio!',sound:'joy'}],mv4Dress));mv4Btn(ui,'Ricomincia',showMiloIntro,true)}
+function mv4Dress(){MV4.phase='dress';const ui=mv4Main('Vestiamo Milo!','Prova gli accessori che ti piacciono',showMiloIntro);mv4Backdrop(ui,'room');const a=mv4Node(ui.props,'g');function decorate(){a.innerHTML='';if(MV4.accessory==='bow')a.innerHTML+=`<g transform="translate(500 600)"><path d="M-17 0Q-120 -74 -104 22Q-60 53 -17 17Z M17 0Q120 -74 104 22Q60 53 17 17Z" fill="#ef7791" stroke="#a84869" stroke-width="7"/><circle r="23" fill="#ffd17c" stroke="#a84869" stroke-width="6"/></g>`;
+ if(MV4.accessory==='cap')a.innerHTML+=`<g transform="translate(505 197)"><path d="M-145 12 Q-135 -130 0 -118 Q130 -130 145 12Z" fill="#75b9c7" stroke="#3e869b" stroke-width="9"/><ellipse cy="19" rx="160" ry="21" fill="#5aa3b2" stroke="#3e869b" stroke-width="8"/></g>`;
+ if(MV4.accessory==='flower')a.innerHTML+=`<g transform="translate(312 303)">${[0,60,120,180,240,300].map(d=>`<ellipse transform="rotate(${d})" cy="-34" ry="34" rx="17" fill="#f6a4b1" stroke="#c46a81" stroke-width="4"/>`).join('')}<circle r="19" fill="#f5d76d"/></g>`;
+ if(MV4.decor==='star')a.innerHTML+=`<g transform="translate(506 815)"><path d="M0 -36L11 -12 38 -10 17 8 25 36 0 22 -25 36 -17 8 -38 -10 -11 -12Z" fill="#f9d568" stroke="#c18f48" stroke-width="6"/></g>`;
+ }decorate();
+ [['Fiocco','bow'],['Cappello','cap'],['Fiore','flower'],['Stella','star']].forEach(([label,val])=>mv4Btn(ui,label,()=>{if(val==='star')MV4.decor=MV4.decor===val?'':val;else MV4.accessory=MV4.accessory===val?'':val;decorate();ui.ch()}));
+ mv4Btn(ui,'Foto ricordo',mv4Photo);}
+function mv4Photo(){MV4.phase='photo';const ui=mv4Main('Che bello, Milo!','La nostra foto ricordo',showAnimali);mv4Backdrop(ui,'room');
+ if(MV4.accessory){let a=mv4Node(ui.props,'g');if(MV4.accessory==='bow')a.innerHTML=`<g transform="translate(500 603)"><path d="M-12 0Q-94 -63 -92 20Q-45 47 -12 14Z M12 0Q94 -63 92 20Q45 47 12 14Z" fill="#ef7791" stroke="#a84869" stroke-width="6"/><circle r="19" fill="#ffd17c"/></g>`;
+ if(MV4.accessory==='cap')a.innerHTML=`<path d="M360 222Q400 70 505 83Q624 77 643 222Z" fill="#75b9c7" stroke="#3e869b" stroke-width="10"/><ellipse cx="501" cy="226" rx="149" ry="20" fill="#5aa3b2"/>`;
+ if(MV4.accessory==='flower')a.innerHTML=`<g transform="translate(314 315)">${[0,60,120,180,240,300].map(d=>`<ellipse transform="rotate(${d})" cy="-29" ry="27" rx="14" fill="#f6a4b1"/>`).join('')}<circle r="16" fill="#f5d76d"/></g>`;}
+ if(MV4.decor==='star')mv4Node(ui.props,'text',{x:480,y:810,'font-size':77,fill:'#f9d568'},'★');
+ mv4Node(ui.effects,'text',{x:505,y:89,'text-anchor':'middle',fill:'#c08455','font-family':'Fredoka,system-ui','font-size':56,'font-weight':700},'Milo è bellissimo!');
+ mv4Audio('photo');const flash=mv4Node(ui.overlay,'rect',{x:20,y:20,width:960,height:960,rx:60,fill:'#fff',class:'mv4-screen-flash'});setTimeout(()=>flash.remove(),650);
+ mv4Btn(ui,'Ancora una volta!',showMiloIntro);mv4Btn(ui,'Torna agli animali',showAnimali,true);
+}
 
 showHome();
 document.addEventListener('gesturestart',e=>e.preventDefault());
