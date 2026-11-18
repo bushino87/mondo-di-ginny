@@ -3879,6 +3879,174 @@ const M71_CSS=`
 `;
 {const el=document.createElement('style');el.textContent=M71_CSS;document.head.appendChild(el)}
 
+
+/* === MILO 7.2: one persistent SVG scene, two wordless story beats, generous basket column === */
+const M72 = {ui:null,objects:[],stage:0,dragging:false,audio:{},token:0};
+function m72Audio(name,volume=.34){
+ if(MUT)return;
+ try{
+  const a=new Audio('./assets/sounds/'+name+'.wav');a.volume=volume;
+  a.play().catch(()=>{});return a;
+ }catch(e){}
+}
+function m72SceneXY(ui,clientX,clientY){
+ const p=ui.svg.createSVGPoint();p.x=clientX;p.y=clientY;
+ const ctm=ui.svg.getScreenCTM();return ctm?p.matrixTransform(ctm.inverse()):{x:0,y:0};
+}
+function m72MakeObject(o,layer){
+ const g=mv4Node(layer,'g',{class:'m72-object','data-kind':o.kind});
+ let art=o.kind==='twig' ?
+ '<path d="M-45 33Q-12 8 34 -36" fill="none" stroke="#65402e" stroke-width="19" stroke-linecap="round"/><path d="M-45 33Q-12 8 34 -36" fill="none" stroke="#b2875b" stroke-width="11" stroke-linecap="round"/><path d="M-17 11L-39 -19M5 -10L30 7" stroke="#65402e" stroke-width="13" fill="none" stroke-linecap="round"/><path d="M-17 11L-39 -19M5 -10L30 7" stroke="#c69b72" stroke-width="7" fill="none" stroke-linecap="round"/>'
+ :m5LeafTypes[o.shape](o.color);
+ g.innerHTML=art+'<circle r="55" fill="transparent"/>';
+ o.el=g; o.x=o.originX;o.y=o.originY;o.rot=o.rotation;o.scale=o.kind==='twig'?1.33:1.47;
+ m72Pose(o);return g;
+}
+function m72Pose(o){
+ o.el.setAttribute('transform',`translate(${o.x.toFixed(2)} ${o.y.toFixed(2)}) rotate(${o.rot.toFixed(2)}) scale(${o.scale.toFixed(3)})`);
+}
+function m72Start(){
+ m5Init();
+ const ui=m5Scene('','','garden','leaves');
+ ui.head.style.display='none';ui.foot.style.display='none';
+ ui.animal.style.animation='none';
+ ui.animal.style.transform='none';
+ ui.w.classList.add('m72-screen');
+ M72.ui=ui;M72.stage=0;M72.dragging=false;const token=++M72.token;
+ const alive=()=>ui.w.isConnected&&M72.token===token;
+ // FIXED random round created before the first narrative frame.
+ // Three distinct leaves and one guaranteed twig, all on dog silhouette.
+ const spots=[{x:308,y:485},{x:684,y:471},{x:475,y:253},{x:399,y:663},{x:603,y:648},{x:423,y:739},{x:783,y:738},{x:332,y:817}];
+ const locations=m5Mix(spots).slice(0,4);
+ M72.objects=locations.map((p,i)=>({kind:i===3?'twig':'leaf',shape:i%3,color:m5Choose(m5Color),rotation:m5Rand(-27,27),originX:p.x,originY:p.y,done:false}));
+ // All sprites stay in this same non-animated coordinate system, throughout the round.
+ const pickLayer=mv4Node(ui.overlay,'g',{'data-part':'m72-pickables'});
+ M72.objects.forEach(o=>m72MakeObject(o,pickLayer));
+ const basket=m7Basket(ui);
+ const basketOpening=mv4Node(ui.overlay,'ellipse',{cx:850,cy:796,rx:91,ry:22,fill:'#f6d17d',opacity:0,'pointer-events':'none'});
+ const zoneGlow=mv4Node(ui.overlay,'path',{d:'M745 185L959 185L959 789Q850 820 745 789Z',fill:'#ffe08c',opacity:0,'pointer-events':'none'});
+ const hitArea= {left:746,right:956,top:160,bottom:935};
+ const isInColumn=(p)=>p.x>=hitArea.left&&p.x<=hitArea.right&&p.y>=hitArea.top&&p.y<=hitArea.bottom;
+ const glow=(value)=>{zoneGlow.setAttribute('opacity',value?'.19':'0');basketOpening.setAttribute('opacity',value?'.48':'0');};
+ // Progress pips: no words.
+ const dots=mv4Node(ui.overlay,'g',{'pointer-events':'none'});
+ const updateDots=()=>{dots.innerHTML='';M72.objects.forEach((o,i)=>{
+  const x=427+i*47;mv4Node(dots,'circle',{cx:x,cy:87,r:15,fill:o.done?'#90bd83':'#fff8e5',stroke:'#966844','stroke-width':4});
+  if(o.done)mv4Node(dots,'path',{d:`M${x-8} 87l6 6 12 -13`,stroke:'white','stroke-width':4,fill:'none'});
+ });};updateDots();
+ // The two illustrated story beats are drawn above the final scene, but the final
+ // pickables have already been created and will never be regenerated.
+ const storyboard=mv4Node(ui.overlay,'g',{'data-part':'m72-story','pointer-events':'none'});
+ function drawStoryboard(frame){
+  storyboard.innerHTML='';
+  if(frame>=2)return;
+  // Hide all objects until frame 3: prevents a false layout from being shown.
+  M72.objects.forEach(o=>o.el.style.visibility='hidden');
+  ui.animal.style.visibility='hidden';
+  mv4Node(storyboard,'path',{d:'M34 865Q255 803 500 852Q722 796 969 842V952H34Z',fill:'#c9e09f'});
+  for(let i=0;i<5;i++){
+   const xx=118+i*178;mv4Node(storyboard,'path',{d:`M${xx} 842V662`,stroke:'#9fbe84','stroke-width':18,'stroke-linecap':'round'});
+   mv4Node(storyboard,'circle',{cx:xx,cy:646,r:47,fill:'#8dc185'});
+  }
+  // Same Milo illustration asset; different location and pose for each beat.
+  const dog=mv4Node(storyboard,'image',{href:'./assets/milo.png',x:0,y:0,width:580,height:640,preserveAspectRatio:'xMidYMid meet'});
+  if(frame===0){
+   dog.setAttribute('x','70');dog.setAttribute('y','365');
+   dog.animate([{opacity:.98},{opacity:1},{opacity:.98}],{duration:1400,iterations:Infinity});
+  }else{
+   dog.setAttribute('x','345');dog.setAttribute('y','165');
+   dog.animate([{opacity:1},{opacity:.94},{opacity:1}],{duration:1350,iterations:Infinity});
+  }
+  const pile=mv4Node(storyboard,'g',{});
+  for(let j=0;j<15;j++){
+   const a=j*.76,r=22+11*(j%4), px=740+Math.cos(a)*r*2,py=829+Math.sin(a)*r*.6-(j%5)*11;
+   mv4Node(pile,'g',{transform:`translate(${px.toFixed(1)} ${py.toFixed(1)}) rotate(${j*33}) scale(${.8+j%3*.18})`},m5LeafTypes[j%4](m5Color[j%6]));
+  }
+  if(frame===1){for(let j=0;j<5;j++){
+   const leaf=mv4Node(storyboard,'g',{transform:`translate(${600+j*70} ${470-j%2*60}) rotate(${j*47})`},m5LeafTypes[j%4](m5Color[j%6]));
+   leaf.animate([{opacity:.55},{opacity:1},{opacity:.55}],{duration:1350,iterations:Infinity,delay:j*70});
+  }}
+ }
+ const advanceButton=m7CircleButton(ui,856,348,'arrow',()=>{
+  if(!alive())return;
+  if(M72.stage===0){M72.stage=1;drawStoryboard(1);m72Audio('salto',.33);m72Audio('fruscio',.22);}
+  else if(M72.stage===1){M72.stage=2;storyboard.remove();ui.animal.style.visibility='visible';M72.objects.forEach(o=>o.el.style.visibility='visible');m72Audio('bau',.23);}
+  else if(M72.stage===2){M72.stage=3;advanceButton.remove();m72Audio('foglia',.22);}
+ });
+ drawStoryboard(0);
+ m72Audio('passi',.22);m72Audio('uccellini',.12);
+ m7CircleButton(ui,120,883,'reset',()=>m72Start());
+ let completed=0;
+ function finishRound(){
+  m72Audio('vittoria',.26);m72Audio('bau',.16);
+  m5Burst(ui,503,165);
+  const next=m7CircleButton(ui,846,348,'arrow',()=>{
+   if(alive())m5Narrative('', 'garden',[{kind:'mud',sound:'step'},{kind:'mud',sound:'splash'}],m5Soap);
+  });next.classList.add('m72-next-ready');
+ }
+ M72.objects.forEach(o=>{
+  const g=o.el;let held=false,pid=-1,dx=0,dy=0,startPoint=null,settling=false;
+  const set=(x,y,rot=o.rot,scale=o.scale)=>{o.x=x;o.y=y;o.rot=rot;o.scale=scale;m72Pose(o)};
+  g.addEventListener('pointerdown',e=>{
+   if(M72.stage!==3||o.done||settling||!alive())return;
+   e.preventDefault();e.stopPropagation();
+   held=true;pid=e.pointerId;M72.dragging=true;
+   startPoint=m72SceneXY(ui,e.clientX,e.clientY);
+   dx=o.x-startPoint.x;dy=o.y-startPoint.y;
+   pickLayer.appendChild(g);g.classList.add('m72-held');
+   try{g.setPointerCapture(pid)}catch(_){}
+   m72Audio(o.kind==='twig'?'rametto':'foglia',.24);
+  });
+  g.addEventListener('pointermove',e=>{
+   if(!held||pid!==e.pointerId||!alive())return;
+   e.preventDefault();const p=m72SceneXY(ui,e.clientX,e.clientY);
+   set(Math.max(45,Math.min(967,p.x+dx)),Math.max(55,Math.min(939,p.y+dy)));
+   glow(isInColumn({x:o.x,y:o.y}));
+  });
+  function release(e,abort){
+   if(!held)return;held=false;pid=-1;M72.dragging=false;g.classList.remove('m72-held');glow(false);
+   if(!alive()||abort)return;
+   const p=m72SceneXY(ui,e.clientX,e.clientY),
+       moved=Math.hypot(p.x-startPoint.x,p.y-startPoint.y);
+   if(moved<10)return;
+   const sx=o.x,sy=o.y,sr=o.rot,sc=o.scale;
+   settling=true;
+   if(isInColumn({x:o.x,y:o.y})){
+    // Vertical column capture: any height above the basket, no teleport to the side.
+    // Only a small horizontal correction to keep the item inside the actual mouth.
+    const landingX=Math.max(795,Math.min(905,sx));
+    const atX= sx+(landingX-sx)*.6;
+    m7Animate(ui,500,t=>{
+     const yy=sy+(805-sy)*t;
+     const xx=sx+(atX-sx)*Math.min(1,t*2);
+     set(xx,yy,sr+80*t,sc*(1-.70*t));
+    },()=>{
+     if(!alive())return;
+     g.remove();o.done=true;completed++;settling=false;updateDots();
+     m72Audio('cestino',.36);m5Burst(ui,850,795);
+     if(completed===M72.objects.length)finishRound();
+    });
+   }else{
+    const landingY=900,landingX=Math.max(75,Math.min(945,sx));
+    m7Animate(ui,350,t=>set(sx+(landingX-sx)*t,sy+(landingY-sy)*t,sr+18*t,sc),()=>{
+     if(!alive())return;settling=false;m72Audio('tonfo',.18);
+    });
+   }
+  }
+  g.addEventListener('pointerup',e=>{if(e.pointerId!==pid)return;e.preventDefault();e.stopPropagation();release(e,false)});
+  g.addEventListener('pointercancel',e=>{if(e.pointerId===pid)release(e,true)});
+ });
+}
+function showMiloIntro(){m72Start()}
+function m5Leaves(){m72Start()}
+{const style=document.createElement('style');style.textContent=`
+.m72-object{touch-action:none;cursor:grab;filter:drop-shadow(0 4px 3px #54392366)}
+.m72-held{cursor:grabbing;filter:drop-shadow(0 10px 8px #543923aa)}
+.m72-screen .m7-button[aria-label="Avanti"]{filter:drop-shadow(0 0 16px #ffdc84)}
+@keyframes m72Pulse{0%,100%{opacity:1}50%{opacity:.75}}
+.m72-screen .m7-button[aria-label="Avanti"]{animation:m72Pulse 1s ease-in-out infinite}
+`;document.head.appendChild(style)}
+
 showHome();
 document.addEventListener('gesturestart',e=>e.preventDefault());
 </script><script>
