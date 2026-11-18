@@ -213,6 +213,23 @@ html,body{margin:0;height:100%;overflow:hidden;font-family:ui-rounded,'Trebuchet
 .m9-has-printed-arrow .m9-story-next{opacity:0;pointer-events:none}
 @keyframes m9pulse{50%{transform:scale(1.07)}}
 @keyframes m9appear{from{opacity:.3}to{opacity:1}}
+</style><style id="m10-style">
+/* Single, immersive, full-screen garden scene, no nested rounded panels. */
+.m72-screen{position:absolute!important;inset:0!important;width:100vw!important;height:100dvh!important;min-height:100vh!important;padding:0!important;background:#73c449!important;overflow:hidden!important}
+.m72-screen .mv4-top,.m72-screen .mv4-footer{display:none!important}
+.m72-screen .mv4-board{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;display:flex!important;justify-content:center!important;align-items:center!important;overflow:hidden!important}
+.m72-screen .mv4-canvas{position:relative!important;z-index:2!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;display:block!important;overflow:visible!important}
+.m10-background{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.m10-story{position:fixed;inset:0;z-index:55;overflow:hidden;background:#80c95b;touch-action:manipulation}
+.m10-story .m10-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+.m10-story-next{position:absolute;right:max(24px,4vw);bottom:max(25px,calc(env(safe-area-inset-bottom,0px) + 4vh));width:clamp(70px,8.5vw,105px);height:clamp(70px,8.5vw,105px);border-radius:50%;background:linear-gradient(145deg,#ffdb64,#ff9e20);border:6px solid #fff9e9;color:#fff;font:900 55px system-ui;box-shadow:0 7px 0 #c97b2e,0 0 0 4px #e2a545,0 0 23px #ffe88b;z-index:4;cursor:pointer;touch-action:manipulation;animation:m10-nextpulse 1.5s ease-in-out infinite}
+@keyframes m10-nextpulse{50%{transform:scale(1.075)}}
+.m10-story .m10-photo{animation:m10-enter .35s ease-out}
+@keyframes m10-enter{from{opacity:.5;transform:scale(1.018)}to{opacity:1;transform:scale(1)}}
+/* Interactivity: basket still visible, touch target remains on real assets. */
+.m72-screen .m72-object{cursor:grab;touch-action:none;filter:drop-shadow(0 3px 2px #5b3d2560)}
+.m72-screen .m72-held{cursor:grabbing;filter:drop-shadow(0 9px 5px #5b3d2577)}
+@media (orientation:portrait){.m10-story .m10-photo{object-position:50% center}.m10-story-next{right:18px;bottom:40px}}
 </style></head><body>
 <div id="stage"></div>
 <button id="back" aria-label="indietro" style="display:none">⬅️</button>
@@ -3927,7 +3944,7 @@ function m9Garden(ui){
  <radialGradient id="m9Leaves"><stop stop-color="#b2e875"/><stop offset=".82" stop-color="#63b447"/><stop offset="1" stop-color="#4f9b3f"/></radialGradient>
  <filter id="m9Shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#3c7d30" flood-opacity=".22"/></filter>
  </defs>
- <rect x="23" y="22" width="954" height="932" rx="55" fill="url(#m9Sky)"/>
+ <rect x="0" y="0" width="1000" height="1000" fill="url(#m9Sky)"/>
  <circle cx="842" cy="144" r="63" fill="#fff5aa" opacity=".95"/>
  <g fill="#fff" opacity=".86"><ellipse cx="238" cy="226" rx="89" ry="28"/><ellipse cx="185" cy="229" rx="46" ry="22"/><ellipse cx="566" cy="205" rx="86" ry="25"/><ellipse cx="613" cy="191" rx="48" ry="25"/></g>
  <path d="M22 550Q170 423 313 512Q450 387 619 505Q820 392 978 531V963H22Z" fill="#b1e3b0"/>
@@ -3976,6 +3993,16 @@ function m72Start(){
  m5Init();
  const ui=m5Scene('','','garden','leaves');
  m9Garden(ui);
+ // Paint garden in a dedicated edge-to-edge vector layer, independently of centered Milo.
+ const landscape=document.createElementNS('http://www.w3.org/2000/svg','svg');
+ landscape.setAttribute('class','m10-background');landscape.setAttribute('viewBox','0 0 1000 1000');
+ landscape.setAttribute('preserveAspectRatio','xMidYMid slice');
+ ui.board.insertBefore(landscape,ui.svg);
+ landscape.appendChild(ui.bg); // background moves, not duplicated; SVG game stays transparent
+ // Remove the inherited cream rounded square under the dog.
+ const gameFrame=Array.from(ui.svg.children).find(n=>n.tagName.toLowerCase()==='rect');
+ if(gameFrame)gameFrame.remove();
+ ui.svg.setAttribute('preserveAspectRatio','xMidYMid meet');
  ui.head.style.display='none';ui.foot.style.display='none';
  ui.animal.style.animation='none';
  ui.animal.style.transform='none';
@@ -4014,29 +4041,20 @@ function m72Start(){
  });};updateDots();
  // The two illustrated story beats are drawn above the final scene, but the final
  // pickables have already been created and will never be regenerated.
- const story=el(ui.w,'m9-story');
- const bg=el(story,'m9-story-blur');
- const photo=el(story,'m9-story-image');
- const next=document.createElement('button');next.className='m9-story-next';next.setAttribute('aria-label','Avanti');next.innerHTML='➜';story.appendChild(next);
- const pictures=['./m9-corsa.png','./m9-salto.png','./m9-ritorno.png'];
- function showStory(frame){
-   const src=pictures[frame];
-   bg.style.backgroundImage=`url("${src}")`;
-   photo.style.backgroundImage=`url("${src}")`;
-   story.classList.toggle('m9-has-printed-arrow',frame===1);
-   photo.classList.toggle('m9-landscape',frame===2);
- }
+ const story=el(ui.w,'m10-story');
+ const storyImage=document.createElement('img');storyImage.className='m10-photo';storyImage.alt='';storyImage.draggable=false;story.appendChild(storyImage);
+ const next=document.createElement('button');next.className='m10-story-next';next.type='button';next.setAttribute('aria-label','Avanti');next.textContent='➜';story.appendChild(next);
+ const pictures=['./m10-storia-1.jpg','./m10-storia-2.jpg','./m10-storia-3.jpg'];
+ function showStory(frame){storyImage.src=pictures[frame]}
  function goNext(){
   if(!alive())return;
-  if(M72.stage===0){M72.stage=1;showStory(1);m72Audio('salto',.30);m72Audio('fruscio',.24);}
-  else if(M72.stage===1){M72.stage=2;showStory(2);m72Audio('fruscio',.22);m72Audio('bau',.15);}
-  else if(M72.stage===2){M72.stage=3;story.remove();m72Audio('bau',.2);m72Audio('foglia',.15);}
+  if(M72.stage===0){M72.stage=1;showStory(1);m72Audio('salto',.30);m72Audio('fruscio',.24)}
+  else if(M72.stage===1){M72.stage=2;showStory(2);m72Audio('fruscio',.22);m72Audio('bau',.15)}
+  else if(M72.stage===2){M72.stage=3;story.remove();m72Audio('bau',.20);m72Audio('foglia',.15)}
  }
  next.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();goNext()});
- story.addEventListener('pointerdown',e=>{if(e.target===next)return;e.preventDefault();e.stopPropagation();goNext()});
  showStory(0);
  m72Audio('passi',.22);m72Audio('uccellini',.12);
- m7CircleButton(ui,120,883,'reset',()=>m72Start());
  let completed=0;
  function finishRound(){
   m72Audio('vittoria',.26);m72Audio('bau',.16);
@@ -4088,7 +4106,7 @@ function m72Start(){
      if(completed===M72.objects.length)finishRound();
     });
    }else{
-    const landingY=900,landingX=Math.max(75,Math.min(945,sx));
+    const landingY=900,landingX=Math.max(85,Math.min(705,sx));
     m7Animate(ui,350,t=>set(sx+(landingX-sx)*t,sy+(landingY-sy)*t,sr+18*t,sc),()=>{
      if(!alive())return;settling=false;m72Audio('tonfo',.18);
     });

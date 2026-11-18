@@ -1,1 +1,5 @@
-Mondo di Ginny v9: carica tutti i file e le cartelle nella root di GitHub Pages, mantenendo le sottocartelle. Non eliminare assets/milo.png già presente sul sito. Le scene sono illustrative e la raccolta è interattiva.
+MILO V10 – Aggiornamento GitHub Pages
+Estrai lo ZIP e carica tutti i file preservando cartelle assets/ e icons/.
+Sostituisci index.html e sw.js.
+La grafica narrativa è in 3 fotografie JPG 4:3 senza controlli dipinti.
+La raccolta foglie usa freccia avanti reale e non ha più l’icona di reset in basso a sinistra.
