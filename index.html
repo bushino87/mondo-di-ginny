@@ -3746,6 +3746,139 @@ const M7_STYLE=`
 `;
 {const style=document.createElement('style');style.textContent=M7_STYLE;document.head.appendChild(style)}
 
+
+/* === Milo 7.1: single-scene leaf collection, screen-accurate basket target. === */
+const M71 = {round:null};
+function m71Start(){
+ m5Init();
+ const ui=m5Scene('','','garden','leaves');
+ ui.head.style.display='none';
+ // Do not animate the parent of pickables: every item uses the same stable SVG space.
+ ui.animal.style.animation='none';
+ const token=MV5.token, valid=()=>ui.w.isConnected&&MV5.token===token;
+ const spots=[
+  {x:310,y:470,part:'ear'}, {x:555,y:306,part:'head'},
+  {x:395,y:635,part:'chest'}, {x:757,y:707,part:'tail'},
+  {x:598,y:622,part:'shoulder'}, {x:360,y:795,part:'paw'}
+ ];
+ const locations=m5Mix(spots).slice(0,4);
+ // Exactly three visibly different leaves + one unmistakable branch, every round.
+ const objects=locations.map((p,i)=>({id:i,kind:i===3?'twig':'leaf',shape:i===3?4:i,
+   color:m5Choose(m5Color),x:p.x,y:p.y,angle:m5Rand(-28,28),done:false}));
+ M71.round=objects;
+ const layer=mv4Node(ui.animal,'g',{'data-part':'m71-pickables'});
+ // Basket is an independent, on-screen target and is rendered above its contents.
+ const basket=m7Basket(ui);
+ const basketGlow=mv4Node(ui.overlay,'ellipse',{
+   cx:850,cy:790,rx:128,ry:56,fill:'none',stroke:'#fff5b2','stroke-width':10,
+   opacity:0,'pointer-events':'none'
+ });
+ const pip=mv4Node(ui.overlay,'g',{'pointer-events':'none'});
+ let mode='intro', complete=0, busy=0;
+ function updatePips(){
+  pip.innerHTML='';objects.forEach((obj,i)=>{
+   const x=434+i*44;
+   mv4Node(pip,'circle',{cx:x,cy:87,r:15,fill:obj.done?'#83bb79':'#fff6dc',stroke:'#936344','stroke-width':4});
+   if(obj.done) mv4Node(pip,'path',{d:`M${x-8} 87l6 6 12 -14`,stroke:'#fff','stroke-width':4,fill:'none','stroke-linecap':'round'});
+  });
+ }
+ updatePips();
+ // The entire body and visible mouth of the basket are pickable. Screen rectangles
+ // avoid the local-space offsets that affected iPad's pointer event geometry.
+ const inBasket=(cx,cy)=>{
+  const r=basket.getBoundingClientRect();
+  return cx>=r.left-18 && cx<=r.right+18 && cy>=r.top-52 && cy<=r.bottom-14;
+ };
+ const scenePt=(cx,cy)=>{
+  const pt=ui.svg.createSVGPoint();pt.x=cx;pt.y=cy;
+  return pt.matrixTransform(ui.svg.getScreenCTM().inverse());
+ };
+ function highlight(on){basketGlow.setAttribute('opacity',on?'0.95':'0')}
+ const saved=[];
+ objects.forEach((o,i)=>{
+  const g=mv4Node(layer,'g',{class:'mv4-item m71-item','data-kind':o.kind,'data-index':String(i)});
+  // Larger, distinct shapes. The twig is a branch with its own silhouette.
+  const art=o.kind==='twig'
+    ?`<path d="M-53 43Q-21 11 5 -8T52 -47" fill="none" stroke="#65412d" stroke-width="18" stroke-linecap="round"/><path d="M-53 43Q-21 11 5 -8T52 -47" fill="none" stroke="#ab7852" stroke-width="11" stroke-linecap="round"/><path d="M-15 8L-44 -27M17 -20L37 7" fill="none" stroke="#67432e" stroke-width="14" stroke-linecap="round"/><path d="M-15 8L-44 -27M17 -20L37 7" fill="none" stroke="#b5875e" stroke-width="7" stroke-linecap="round"/>`
+    :m5LeafTypes[o.shape](o.color);
+  g.innerHTML=art+'<circle cx="0" cy="0" r="57" fill="transparent" stroke="none"/>';
+  const scale=o.kind==='twig'?1.63:1.53;
+  let x=o.x,y=o.y,angle=o.angle,down=false,settling=false,pid=null,offX=0,offY=0,
+      downX=0,downY=0,lastX=0,lastY=0;
+  function position(xx,yy,ang=angle,sc=scale){x=xx;y=yy;angle=ang;m7Move(g,x,y,angle,sc)}
+  position(x,y);
+  function finishCollection(){
+   if(!valid())return;
+   g.remove();o.done=true;complete++;busy--;updatePips();
+   m5Burst(ui,850,775);mv4Audio('leaves');
+   if(complete===objects.length){
+    m5Burst(ui,500,185);
+    const arrow=m7CircleButton(ui,846,355,'arrow',()=>{
+     if(valid())m5Narrative('', 'garden',[{kind:'mud',sound:'step'},{kind:'mud',sound:'splash'}],m5Soap);
+    });
+    arrow.classList.add('m71-ready');
+   }
+  }
+  function release(e,cancel=false){
+   if(!down)return;
+   down=false;g.classList.remove('m71-held');
+   const cx=Number.isFinite(e.clientX)?e.clientX:lastX;
+   const cy=Number.isFinite(e.clientY)?e.clientY:lastY;
+   highlight(false);
+   if(!valid()||cancel)return;
+   // A tap is not a drag: no teleport, no unintended falling.
+   if(Math.hypot(cx-downX,cy-downY)<9) return;
+   settling=true;busy++;
+   const x0=x,y0=y,a0=angle;
+   if(inBasket(cx,cy)){
+    const p=m7ScenePointToLocal(ui.svg,layer,850,807);
+    m7Animate(ui,380,v=>position(x0+(p.x-x0)*v,y0+(p.y-y0)*v-25*Math.sin(Math.PI*v),a0+80*v,scale*(1-.65*v)),finishCollection);
+   }else{
+    const floorScene=scenePt(cx,cy);
+    const fallTo=m7ScenePointToLocal(ui.svg,layer,
+      Math.max(85,Math.min(707,floorScene.x)),895+(i%2)*24);
+    m7Animate(ui,300,v=>position(x0+(fallTo.x-x0)*v,y0+(fallTo.y-y0)*v,a0+28*v),()=>{
+     if(!valid())return;position(fallTo.x,fallTo.y,a0+28);busy--;settling=false;
+    });
+   }
+  }
+  g.addEventListener('pointerdown',e=>{
+   if(mode!=='play'||settling||o.done)return;
+   e.preventDefault();e.stopPropagation();
+   down=true;pid=e.pointerId;
+   downX=lastX=e.clientX;downY=lastY=e.clientY;
+   const p=m7LocalFromEvent(layer,e);offX=x-p.x;offY=y-p.y;
+   layer.appendChild(g);g.classList.add('m71-held');
+   try{g.setPointerCapture(pid)}catch(_){}
+  });
+  g.addEventListener('pointermove',e=>{
+   if(!down||e.pointerId!==pid||!valid())return;
+   e.preventDefault();lastX=e.clientX;lastY=e.clientY;
+   const p=m7LocalFromEvent(layer,e);
+   position(Math.max(30,Math.min(970,p.x+offX)),Math.max(45,Math.min(950,p.y+offY)));
+   highlight(inBasket(e.clientX,e.clientY));
+  });
+  g.addEventListener('pointerup',e=>{if(e.pointerId===pid){e.preventDefault();e.stopPropagation();release(e)}});
+  g.addEventListener('pointercancel',e=>{if(e.pointerId===pid){release(e,true);highlight(false)}});
+  saved.push(g);
+ });
+ // Objects do NOT change positions when the big arrow is tapped; only unlock drag.
+ const begin=m7CircleButton(ui,845,355,'arrow',()=>{
+  if(mode==='intro'){
+   mode='play';begin.remove();m5Burst(ui,815,190);mv4Audio('step');
+  }
+ });
+ m7CircleButton(ui,119,890,'reset',()=>m71Start());
+}
+function showMiloIntro(){m71Start()}
+function m5Leaves(){m71Start()}
+const M71_CSS=`
+ .m71-item{touch-action:none;cursor:grab;filter:drop-shadow(0 3px 2px #65432c66)}
+ .m71-item.m71-held{cursor:grabbing;filter:drop-shadow(0 10px 7px #65432c88)}
+ .m71-ready{filter:drop-shadow(0 0 16px #ffe493)}
+`;
+{const el=document.createElement('style');el.textContent=M71_CSS;document.head.appendChild(el)}
+
 showHome();
 document.addEventListener('gesturestart',e=>e.preventDefault());
 </script><script>
