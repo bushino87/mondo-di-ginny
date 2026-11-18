@@ -1,2 +1,1 @@
-Milo v7.2 - Caricare index.html e sw.js nella root del repository e la cartella assets/sounds con i 10 file WAV. NON cancellare assets/milo.png.
-I WAV sono effetti originali generati appositamente con sintesi audio: non sono campioni Mixkit.
+Carica index.html e i 3 file PNG nella root del repository/sito, sovrascrivendo index.html esistente.
