@@ -1,1 +1,1 @@
-Carica index.html e i 3 file PNG nella root del repository/sito, sovrascrivendo index.html esistente.
+Mondo di Ginny v9: carica tutti i file e le cartelle nella root di GitHub Pages, mantenendo le sottocartelle. Non eliminare assets/milo.png già presente sul sito. Le scene sono illustrative e la raccolta è interattiva.

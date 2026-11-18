@@ -201,6 +201,18 @@ html,body{margin:0;height:100%;overflow:hidden;font-family:ui-rounded,'Trebuchet
 .plast i{width:36px;height:20px;border-radius:4px;background:#fbe6cf;display:block}
 .targ{border:5px dashed #fff;border-radius:50%;animation:pulse 1s infinite alternate}
 @keyframes pulse{from{scale:.9}to{scale:1.12}}
+
+.m72-screen{background:linear-gradient(180deg,#7fcff4 0%,#b6e8ac 49%,#78c84d 100%)!important;padding:calc(env(safe-area-inset-top,0px) + 45px) 0 calc(env(safe-area-inset-bottom,0px) + 12px)!important}
+.m72-screen .mv4-board{width:100%;max-width:none;min-height:0}
+.m72-screen .mv4-canvas{max-width: min(100vw,720px);margin:auto}
+.m9-story{position:fixed;inset:0;z-index:55;overflow:hidden;background:#8fd4dd;touch-action:manipulation}
+.m9-story-blur{position:absolute;inset:-40px;background-position:center center;background-size:cover;filter:blur(30px) saturate(1.2) brightness(.85);transform:scale(1.12)}
+.m9-story-image{position:absolute;inset:0;background-position:center center;background-size:contain;background-repeat:no-repeat;filter:drop-shadow(0 0 5px #0001);animation:m9appear .35s ease}
+.m9-story-next{position:absolute;right:max(18px,4vw);bottom:max(26px,calc(env(safe-area-inset-bottom,0px) + 5vh));width:clamp(70px,18vw,94px);height:clamp(70px,18vw,94px);border:7px solid #fff9e6;border-radius:50%;background:linear-gradient(135deg,#ffe766,#ffa529);color:white;font-size:clamp(45px,11vw,62px);font-weight:900;line-height:1;box-shadow:0 6px 0 #cf7b32,0 0 0 5px #f4b24e,0 0 23px #ffe38a;touch-action:manipulation;cursor:pointer;animation:m9pulse 1.4s ease-in-out infinite}
+/* Middle illustration already contains ONE arrow: its hot spot is interactive, no doubled artwork. */
+.m9-has-printed-arrow .m9-story-next{opacity:0;pointer-events:none}
+@keyframes m9pulse{50%{transform:scale(1.07)}}
+@keyframes m9appear{from{opacity:.3}to{opacity:1}}
 </style></head><body>
 <div id="stage"></div>
 <button id="back" aria-label="indietro" style="display:none">⬅️</button>
@@ -3904,6 +3916,37 @@ const M71_CSS=`
 {const el=document.createElement('style');el.textContent=M71_CSS;document.head.appendChild(el)}
 
 
+
+/* MILO 9: backdrop is the actual playable garden, not a backdrop in the story only. */
+function m9Garden(ui){
+ const b=ui.bg;
+ b.innerHTML=`<defs>
+ <linearGradient id="m9Sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#55c6fd"/><stop offset=".7" stop-color="#c3efff"/><stop offset="1" stop-color="#fff1b6"/></linearGradient>
+ <linearGradient id="m9Grass" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#b9e878"/><stop offset=".48" stop-color="#91d64e"/><stop offset="1" stop-color="#60ad3d"/></linearGradient>
+ <linearGradient id="m9Wood" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f7c56b"/><stop offset="1" stop-color="#d98c48"/></linearGradient>
+ <radialGradient id="m9Leaves"><stop stop-color="#b2e875"/><stop offset=".82" stop-color="#63b447"/><stop offset="1" stop-color="#4f9b3f"/></radialGradient>
+ <filter id="m9Shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#3c7d30" flood-opacity=".22"/></filter>
+ </defs>
+ <rect x="23" y="22" width="954" height="932" rx="55" fill="url(#m9Sky)"/>
+ <circle cx="842" cy="144" r="63" fill="#fff5aa" opacity=".95"/>
+ <g fill="#fff" opacity=".86"><ellipse cx="238" cy="226" rx="89" ry="28"/><ellipse cx="185" cy="229" rx="46" ry="22"/><ellipse cx="566" cy="205" rx="86" ry="25"/><ellipse cx="613" cy="191" rx="48" ry="25"/></g>
+ <path d="M22 550Q170 423 313 512Q450 387 619 505Q820 392 978 531V963H22Z" fill="#b1e3b0"/>
+ <path d="M22 627Q181 539 347 607Q482 537 606 602Q798 537 978 611V963H22Z" fill="#8cce75"/>
+ <g id="m9Fence" filter="url(#m9Shadow)">${Array.from({length:13},(_,i)=>`<path d="M${50+i*75} 615V515L${77+i*75} 494L${104+i*75} 515V615Z" fill="#fff9e7" stroke="#d7d6bd" stroke-width="4"/>`).join('')}<path d="M34 554H968M34 599H968" stroke="#fffefa" stroke-width="16"/><path d="M34 554H968M34 599H968" stroke="#d9d8c3" stroke-width="2" opacity=".6"/></g>
+ <path d="M22 648Q240 612 442 670Q710 603 978 665V954H22Z" fill="url(#m9Grass)"/>
+ <path d="M23 860Q250 829 443 863Q746 799 978 856V956H23Z" fill="#74bf43" opacity=".48"/>
+ <!-- Big shaded autumn tree on the left -->
+ <path d="M93 681Q112 471 116 345Q90 320 66 283M116 404Q185 340 222 279" fill="none" stroke="#935b33" stroke-width="53" stroke-linecap="round"/>
+ <path d="M93 681Q112 471 116 345Q90 320 66 283" fill="none" stroke="#ca894a" stroke-width="30" stroke-linecap="round"/>
+ <g filter="url(#m9Shadow)"><circle cx="84" cy="235" r="122" fill="url(#m9Leaves)"/><circle cx="200" cy="259" r="105" fill="#74bd4a"/><circle cx="115" cy="324" r="102" fill="#91c94c"/><circle cx="15" cy="324" r="102" fill="#70b24a"/></g>
+ <g fill="#e6ac3c"><ellipse cx="170" cy="157" rx="44" ry="25" transform="rotate(31 170 157)"/><ellipse cx="65" cy="232" rx="32" ry="20" transform="rotate(-15 65 232)"/></g>
+ <!-- A tiny pet salon behind the fence, right side. -->
+ <g transform="translate(744 350) scale(.68)"><rect x="0" y="95" width="305" height="350" rx="23" fill="url(#m9Wood)" stroke="#b36d40" stroke-width="11"/><path d="M-24 111Q130 -35 329 108L329 145H-24Z" fill="#ec79a5" stroke="#b35b82" stroke-width="10"/><path d="M-12 153H319L300 220Q148 253 12 220Z" fill="#fff7e9" stroke="#d37e97" stroke-width="9"/><path d="M17 153v67M75 153v77M135 153v80M195 153v77M255 153v68" stroke="#ed8aaa" stroke-width="26"/><rect x="104" y="244" width="110" height="192" rx="14" fill="#7cc8e4" stroke="#b46d48" stroke-width="8"/><circle cx="191" cy="346" r="7" fill="#fff3a0"/><circle cx="149" cy="86" r="43" fill="#fff8dc" stroke="#dfaa60" stroke-width="10"/><circle cx="149" cy="76" r="13" fill="#f17da4"/><circle cx="123" cy="99" r="8" fill="#f17da4"/><circle cx="175" cy="99" r="8" fill="#f17da4"/></g>
+ <!-- Flowers and daisies at the bottom -->
+ ${[[74,764],[152,815],[212,752],[685,772],[737,830],[920,777],[115,900],[881,901]].map(([x,y],i)=>`<g transform="translate(${x} ${y})"><path d="M0 10v27" stroke="#3b9850" stroke-width="5"/>${[0,60,120,180,240,300].map(d=>`<ellipse cy="-12" rx="8" ry="16" transform="rotate(${d})" fill="${i%2?'#fff7f3':'#f8a4c7'}"/>`).join('')}<circle r="9" fill="#ffd755"/></g>`).join('')}
+ ${[[112,687],[243,692],[658,720],[816,695],[905,728]].map(([x,y],i)=>`<path d="M${x} ${y}q10 -13 22 0q-3 -17 8 -20" stroke="#4ea13d" stroke-width="6" fill="none" stroke-linecap="round"/>`).join('')}
+ `;
+}
 /* === MILO 7.2: one persistent SVG scene, two wordless story beats, generous basket column === */
 const M72 = {ui:null,objects:[],stage:0,dragging:false,audio:{},token:0};
 function m72Audio(name,volume=.34){
@@ -3932,6 +3975,7 @@ function m72Pose(o){
 function m72Start(){
  m5Init();
  const ui=m5Scene('','','garden','leaves');
+ m9Garden(ui);
  ui.head.style.display='none';ui.foot.style.display='none';
  ui.animal.style.animation='none';
  ui.animal.style.transform='none';
@@ -3947,9 +3991,19 @@ function m72Start(){
  const pickLayer=mv4Node(ui.overlay,'g',{'data-part':'m72-pickables'});
  M72.objects.forEach(o=>m72MakeObject(o,pickLayer));
  const basket=m7Basket(ui);
- const basketOpening=mv4Node(ui.overlay,'ellipse',{cx:850,cy:796,rx:91,ry:22,fill:'#f6d17d',opacity:0,'pointer-events':'none'});
+ basket.innerHTML=`<ellipse cx="848" cy="916" rx="114" ry="26" fill="#35661c" opacity=".19"/>
+  <path d="M748 785Q779 764 847 769Q922 762 949 786L930 911Q849 956 765 911Z" fill="#e6a755" stroke="#854e25" stroke-width="12"/>
+  <path d="M772 802H934M764 850H939M771 891H932" stroke="#ffce80" stroke-width="13" opacity=".9"/>
+  <path d="M792 792L803 926M841 783V937M892 789L886 925" stroke="#b36d35" stroke-width="8" opacity=".8"/>
+  <path d="M762 785Q759 663 850 655Q942 664 942 785" fill="none" stroke="#804c29" stroke-width="24"/>
+  <path d="M762 785Q759 663 850 655Q942 664 942 785" fill="none" stroke="#f4bb6c" stroke-width="14"/>
+  <ellipse cx="849" cy="785" rx="115" ry="36" fill="#f3c479" stroke="#8c542b" stroke-width="11"/>
+  <ellipse cx="849" cy="786" rx="85" ry="20" fill="#6a402c"/>
+  <path d="M756 794Q848 773 943 794" stroke="#ffe3a1" stroke-width="10" fill="none"/>
+  <path d="M835 877h27M848 865v24" stroke="#ffe0a0" stroke-width="7" stroke-linecap="round"/>`;
+  const basketOpening=mv4Node(ui.overlay,'ellipse',{cx:850,cy:796,rx:91,ry:22,fill:'#f6d17d',opacity:0,'pointer-events':'none'});
  const zoneGlow=mv4Node(ui.overlay,'path',{d:'M745 185L959 185L959 789Q850 820 745 789Z',fill:'#ffe08c',opacity:0,'pointer-events':'none'});
- const hitArea= {left:746,right:956,top:160,bottom:935};
+ const hitArea= {left:749,right:948,top:180,bottom:855};
  const isInColumn=(p)=>p.x>=hitArea.left&&p.x<=hitArea.right&&p.y>=hitArea.top&&p.y<=hitArea.bottom;
  const glow=(value)=>{zoneGlow.setAttribute('opacity',value?'.19':'0');basketOpening.setAttribute('opacity',value?'.48':'0');};
  // Progress pips: no words.
@@ -3960,25 +4014,27 @@ function m72Start(){
  });};updateDots();
  // The two illustrated story beats are drawn above the final scene, but the final
  // pickables have already been created and will never be regenerated.
- const storyboard=mv4Node(ui.overlay,'g',{'data-part':'m72-story','pointer-events':'none'});
- const storyFrames=['./avventura_di_milo_nel_giardino_fatato.png','./milo_salta_tra_le_foglie_d_autunno.png','./milo_corre_verso_il_salone_di_toelettatura.png'];
- function drawStoryboard(frame){
-  storyboard.innerHTML='';
-  if(frame>=3)return;
-  M72.objects.forEach(o=>o.el.style.visibility='hidden');
-  ui.animal.style.visibility='hidden';
-  mv4Node(storyboard,'rect',{x:56,y:120,width:888,height:720,rx:36,fill:'#fff9ef',stroke:'#d4af85','stroke-width':8});
-  mv4Node(storyboard,'rect',{x:74,y:138,width:852,height:684,rx:26,fill:'#f7ead0'});
-  mv4Node(storyboard,'image',{href:storyFrames[frame],x:74,y:138,width:852,height:684,preserveAspectRatio:'xMidYMid slice'});
+ const story=el(ui.w,'m9-story');
+ const bg=el(story,'m9-story-blur');
+ const photo=el(story,'m9-story-image');
+ const next=document.createElement('button');next.className='m9-story-next';next.setAttribute('aria-label','Avanti');next.innerHTML='➜';story.appendChild(next);
+ const pictures=['./m9-corsa.png','./m9-salto.png','./m9-ritorno.png'];
+ function showStory(frame){
+   const src=pictures[frame];
+   bg.style.backgroundImage=`url("${src}")`;
+   photo.style.backgroundImage=`url("${src}")`;
+   story.classList.toggle('m9-has-printed-arrow',frame===1);
+   photo.classList.toggle('m9-landscape',frame===2);
  }
- const advanceButton=m7CircleButton(ui,856,348,'arrow',()=>{
+ function goNext(){
   if(!alive())return;
-  if(M72.stage===0){M72.stage=1;drawStoryboard(1);m72Audio('salto',.33);m72Audio('fruscio',.22);}
-  else if(M72.stage===1){M72.stage=2;drawStoryboard(2);m72Audio('bau',.23);m72Audio('fruscio',.18);}
-  else if(M72.stage===2){M72.stage=3;storyboard.remove();ui.animal.style.visibility='visible';M72.objects.forEach(o=>o.el.style.visibility='visible');m72Audio('foglia',.22);}
-  else if(M72.stage===3){M72.stage=4;advanceButton.remove();m5Burst(ui,817,170);m72Audio('step',.20);}
- });
- drawStoryboard(0);
+  if(M72.stage===0){M72.stage=1;showStory(1);m72Audio('salto',.30);m72Audio('fruscio',.24);}
+  else if(M72.stage===1){M72.stage=2;showStory(2);m72Audio('fruscio',.22);m72Audio('bau',.15);}
+  else if(M72.stage===2){M72.stage=3;story.remove();m72Audio('bau',.2);m72Audio('foglia',.15);}
+ }
+ next.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();goNext()});
+ story.addEventListener('pointerdown',e=>{if(e.target===next)return;e.preventDefault();e.stopPropagation();goNext()});
+ showStory(0);
  m72Audio('passi',.22);m72Audio('uccellini',.12);
  m7CircleButton(ui,120,883,'reset',()=>m72Start());
  let completed=0;
@@ -3993,7 +4049,7 @@ function m72Start(){
   const g=o.el;let held=false,pid=-1,dx=0,dy=0,startPoint=null,settling=false;
   const set=(x,y,rot=o.rot,scale=o.scale)=>{o.x=x;o.y=y;o.rot=rot;o.scale=scale;m72Pose(o)};
   g.addEventListener('pointerdown',e=>{
-   if(M72.stage<3||o.done||settling||!alive())return;
+   if(M72.stage!==3||o.done||settling||!alive())return;
    e.preventDefault();e.stopPropagation();
    held=true;pid=e.pointerId;M72.dragging=true;
    startPoint=m72SceneXY(ui,e.clientX,e.clientY);
@@ -4019,7 +4075,7 @@ function m72Start(){
    if(isInColumn({x:o.x,y:o.y})){
     // Vertical column capture: any height above the basket, no teleport to the side.
     // Only a small horizontal correction to keep the item inside the actual mouth.
-    const landingX=Math.max(795,Math.min(905,sx));
+    const landingX=Math.max(791,Math.min(906,sx));
     const atX= sx+(landingX-sx)*.6;
     m7Animate(ui,500,t=>{
      const yy=sy+(805-sy)*t;
